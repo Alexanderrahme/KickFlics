@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Innovation",
+    "slug": "Innovation",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {},
+    "plugins": [
+      "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$KickFlics needs access to your Camera."
+        }
+    ]
+  },
+  "web": {}
+}
