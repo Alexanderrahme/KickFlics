@@ -9,14 +9,24 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "$KickFlics needs access to your Camera."
+      },
+      "bundleIdentifier": "i"
     },
-    "android": {},
+    "android": {
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
+    },
     "plugins": [
-      "react-native-vision-camera",
+      [
+        "react-native-vision-camera",
         {
           "cameraPermissionText": "$KickFlics needs access to your Camera."
         }
+      ]
     ]
   },
   "web": {}
