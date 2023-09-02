@@ -7,6 +7,7 @@ import Shop from "./src/pages/Shop";
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import 'react-native-gesture-handler';
+import TakePhoto from './src/pages/TakePhoto';
 
 export default function App() {
   const Stack = createStackNavigator();
@@ -18,6 +19,7 @@ export default function App() {
         <Drawer.Screen name="Home" component={Home}/>
         <Drawer.Screen name="Shop" component={Shop}/>
         <Drawer.Screen name="About" component={About}/>
+        <Drawer.Screen name="Take a Photo" component={TakePhoto}/>
       </Drawer.Navigator>
     </NavigationContainer>
   );

@@ -13,7 +13,7 @@ const Home: React.FC = () => {
         <ImageBackground style={styles.backgroundImage} source={require('../../assets/images/sneakerCollection.jpeg')}>
             <Text style={styles.heading}>Software Innovation Studio</Text>
             <View style={styles.buttonContainer}>
-                <Pressable onPress={() => nav.navigate('About')} style={styles.aboutButton}>
+                <Pressable onPress={() => nav.navigate("TakePhoto")} style={styles.aboutButton}>
                     <Text>Take a Photo!</Text>
                 </Pressable> 
             </View>
@@ -35,10 +35,8 @@ const Home: React.FC = () => {
         justifyContent: 'center',
     },
     buttonContainer:{
-        //flex: 1,
         marginTop: 50,
         height: 50,
-       //backgroundColor: 'white',
     },
     heading:{
         fontSize: 30,
