@@ -51,7 +51,7 @@ const TakePhoto: React.FC = () => {
       console.error("Error taking picture", error);
     }
   };
-// f
+
   const savePhoto = async () => {
     if (photo?.uri) {
       try {
