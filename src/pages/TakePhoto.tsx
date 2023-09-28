@@ -5,8 +5,9 @@ import { Camera } from 'expo-camera';
 import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { createModel } from "../models/DUMMYMODEL";
+//import { createModel } from "../models/DUMMYMODEL";
 import * as tf from '@tensorflow/tfjs';
+import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 
 interface PhotoType {
   uri: string;
@@ -21,7 +22,7 @@ const TakePhoto: React.FC = () => {
 
   // This needs to change once we are predicting a shoe and not usign a dummy model
   // Need to change <number |null> to string or object, as the prediction probably wont be of type number
-  const [prediction, setPrediction] = useState<number | undefined>(undefined);
+  const [prediction, setPrediction] = useState<number>();
 
 
 
@@ -63,9 +64,11 @@ const TakePhoto: React.FC = () => {
   };
 
   const analysePhoto = async (picture: PhotoType) => {
-    //do some photo analysis and talk to model
-    setPrediction(9999);
-  };
+    // Link to the same thing as in upload Photo
+  
+};
+
+  
 
   const savePhoto = async () => {
     if (photo?.uri) {
@@ -85,7 +88,7 @@ const TakePhoto: React.FC = () => {
       <SafeAreaView style={styles.photo}>
         <Image style={styles.photo} source={{ uri: photo.uri }} />
         {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
-        {<Text>Prediction: {prediction}</Text>}
+        {<Text>Prediction: </Text>}
         <Button title="Retry" onPress={() => setPhoto(undefined)} />
       </SafeAreaView>
     );

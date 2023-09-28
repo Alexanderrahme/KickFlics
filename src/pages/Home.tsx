@@ -17,6 +17,11 @@ const Home: React.FC = () => {
                     <Text>Take a Photo!</Text>
                 </Pressable> 
             </View>
+            <View style={styles.buttonContainer}>
+                <Pressable onPress={() => nav.navigate("Upload a Photo")} style={styles.aboutButton}>
+                    <Text>Upload a Photo!</Text>
+                </Pressable> 
+            </View>
         </ImageBackground>    
     </View>
     );
