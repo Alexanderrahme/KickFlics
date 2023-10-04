@@ -5,10 +5,17 @@ import { Camera } from 'expo-camera';
 import { StyleSheet, Text, View, Button, Image, Alert, Pressable } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from '@expo/vector-icons'; 
+
 
 interface PhotoType {
   uri: string;
   base64?: string;
+}
+
+enum CameraType{
+  back = 'back',
+  front = 'front',
 }
 
 const TakePhoto: React.FC = () => {
@@ -16,6 +23,7 @@ const TakePhoto: React.FC = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
   const [hasMediaLibraryPermissions, setHasMediaLibraryPermission] = useState<boolean | undefined>(undefined);
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
+  const [type, setType] = useState(CameraType.back);
 
   useEffect(() => {
     (async () => {
@@ -52,6 +60,11 @@ const TakePhoto: React.FC = () => {
     }
   };
 
+  const switchCamera = () => {
+    setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+    console.log(type);
+  };
+
   const savePhoto = async () => {
     if (photo?.uri) {
       try {
@@ -76,7 +89,7 @@ const TakePhoto: React.FC = () => {
   }
 
   return (
-    <Camera ref={cameraRef} style={styles.container}>
+    <Camera ref={cameraRef} style={styles.container} type={type}>
         <View style={styles.topContainer}>
 
         </View>
@@ -86,9 +99,9 @@ const TakePhoto: React.FC = () => {
           style={styles.takePictureButton}
           onPress={takePicture} 
           />
-          <View
-          style={styles.putIconHere}
-          />
+          <Pressable onPress={switchCamera}>
+            <Ionicons name="camera-reverse-outline" size={24} color="white" />
+         </Pressable>
         </View>
     </Camera>
   );
