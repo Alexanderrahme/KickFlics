@@ -5,6 +5,9 @@ import { Camera } from 'expo-camera';
 import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
+//import { createModel } from "../models/DUMMYMODEL";
+import * as tf from '@tensorflow/tfjs';
+import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 
 interface PhotoType {
   uri: string;
@@ -17,10 +20,16 @@ const TakePhoto: React.FC = () => {
   const [hasMediaLibraryPermissions, setHasMediaLibraryPermission] = useState<boolean | undefined>(undefined);
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
 
+  // This needs to change once we are predicting a shoe and not usign a dummy model
+  // Need to change <number |null> to string or object, as the prediction probably wont be of type number
+  const [prediction, setPrediction] = useState<number>();
+
+
+
   useEffect(() => {
     (async () => {
       try {
-        const { status: cameraStatus } = await Camera.requestPermissionsAsync();
+        const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
         setHasCameraPermission(cameraStatus === "granted");
         
         const { status: mediaLibraryStatus } = await MediaLibrary.requestPermissionsAsync();
@@ -46,11 +55,20 @@ const TakePhoto: React.FC = () => {
         };
         const picture = await cameraRef.current.takePictureAsync(options);
         setPhoto(picture);
+
+        analysePhoto(picture);
       }
     } catch (error) {
       console.error("Error taking picture", error);
     }
   };
+
+  const analysePhoto = async (picture: PhotoType) => {
+    // Link to the same thing as in upload Photo
+  
+};
+
+  
 
   const savePhoto = async () => {
     if (photo?.uri) {
@@ -70,6 +88,7 @@ const TakePhoto: React.FC = () => {
       <SafeAreaView style={styles.photo}>
         <Image style={styles.photo} source={{ uri: photo.uri }} />
         {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
+        {<Text>Prediction: </Text>}
         <Button title="Retry" onPress={() => setPhoto(undefined)} />
       </SafeAreaView>
     );

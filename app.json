@@ -6,7 +6,8 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": [
-      "**/*"
+      "**/*",
+      "src/model/*"
     ],
     "ios": {
       "supportsTablet": true,
