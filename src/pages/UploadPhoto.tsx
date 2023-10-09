@@ -7,6 +7,8 @@ import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
+import * as ImageManipulator from 'expo-image-manipulator';
+
 
 
 
@@ -34,25 +36,30 @@ const UploadPhoto: React.FC = () => {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
-      //   base64: true
-      // with base64 we can skip some of the pre-processing later on
-      // incorporate this later
     });
-  
-    // Pass selected image to ML function and view
+
     if (result.assets && result.assets.length > 0) {
       const imagePath = result.assets[0].uri;
-      setPickedImage(imagePath);
-      classifyPhoto(imagePath);
-  }
-  };
+
+      // Convert the image to jpg format
+      const jpegImg = await ImageManipulator.manipulateAsync(
+        imagePath,
+        [],
+        { format: ImageManipulator.SaveFormat.JPEG }
+      );
+
+      setPickedImage(jpegImg.uri);
+      classifyPhoto(jpegImg.uri);
+    }
+};
 
   // interface with tensorflow model
   const classifyPhoto = async (imagePath: string) => {
     try {
       console.log("Starting Model");
-      // Load in model
-      const model = await tf.loadLayersModel('file:///src/model/model.json');
+      // Load in model which is hosted on github
+      const model = await tf.loadLayersModel('https://raw.githubusercontent.com/o1100/ShoeModel/main/model.json');
+
       setTfReady(true);
 
       // Pre-process image
