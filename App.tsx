@@ -9,20 +9,22 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import 'react-native-gesture-handler';
 import TakePhoto from './src/pages/TakePhoto';
 import UploadPhoto from './src/pages/UploadPhoto';
+import ShopNavigator from './ShopNavigator';
+
 
 export default function App() {
-  const Stack = createStackNavigator();
+  
   const Drawer = createDrawerNavigator();
 
   return (
     <NavigationContainer>
       <Drawer.Navigator>
         <Drawer.Screen name="Home" component={Home}/>
-        <Drawer.Screen name="Shop" component={Shop}/>
+        <Drawer.Screen name="Shop" component={ShopNavigator}/>
         <Drawer.Screen name="About" component={About}/>
         <Drawer.Screen name="Take a Photo" component={TakePhoto}/>
         <Drawer.Screen name="Upload a Photo" component={UploadPhoto}/>
-
+        
       </Drawer.Navigator>
     </NavigationContainer>
   );

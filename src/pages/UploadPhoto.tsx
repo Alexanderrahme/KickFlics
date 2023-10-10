@@ -52,7 +52,7 @@ const UploadPhoto: React.FC = () => {
     try {
       console.log("Starting Model");
       // Load in model
-      const model = await tf.loadLayersModel('file:///src/model/model.json');
+      const model = await tf.loadLayersModel('C:\Users\jackh\GitHub\KickFlics\src\model\model.json');
       setTfReady(true);
 
       // Pre-process image

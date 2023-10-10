@@ -2,25 +2,30 @@ import React from "react";
 import {useNavigation} from "@react-navigation/native";
 import {View, Image, Text, StyleSheet, SafeAreaView, Pressable} from "react-native";
 import StoreCard from "../components/StoreCard";
-
+import ShoeInfo from "./ShoeInfo";
+import ShopNavigator from "../../ShopNavigator";
 
 const Shop: React.FC = () => {
-    const nav = useNavigation();
-    
-    return (
-      <View style={styles.container}>
-        <StoreCard/>
-      </View>
-    );
-  }
+  const nav = useNavigation();
+  
+  const handleCardPress = (shoe: Shoe) => {
+    nav.navigate("ShoeInfo", {shoe});
+  };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });  
+  return (
+        <View>
+          <StoreCard handleCardPress={handleCardPress} />
+        </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
 
 export default Shop;
