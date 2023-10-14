@@ -2,11 +2,21 @@ import React, { useRef, useState, useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Asset } from 'expo-asset';
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
+<<<<<<< Updated upstream
+=======
+import * as ImageManipulator from 'expo-image-manipulator';
+import TensorflowLite from "@switt/react-native-tensorflow-lite";
+// import Tflite from 'tflite-react-native';
+
+
+
+>>>>>>> Stashed changes
 
 
 
@@ -19,12 +29,13 @@ const UploadPhoto: React.FC = () => {
 
   // Initialise tensorflow
   useEffect(() => {
-    const initTF = async () => {
-      await tf.ready();
+    const initTFLite = async () => {
+      const modelAsset = Asset.fromModule(require('/Users/oliverscott/PycharmProjects/KickFlics/assets/model/model.tflite'));
+      await modelAsset.downloadAsync();
       setTfReady(true);
     };
 
-    initTF();
+    initTFLite();
   }, []);
 
   // Allows a user to upload an image from their camera roll
@@ -47,55 +58,56 @@ const UploadPhoto: React.FC = () => {
   }
   };
 
+
   // interface with tensorflow model
   const classifyPhoto = async (imagePath: string) => {
     try {
       console.log("Starting Model");
+<<<<<<< Updated upstream
       // Load in model
       const model = await tf.loadLayersModel('file:///src/model/model.json');
       setTfReady(true);
+=======
 
-      // Pre-process image
-      const image = await FileSystem.readAsStringAsync(imagePath, {
-        encoding: FileSystem.EncodingType.Base64,
+      // Ensure the image path is in an array as required by runModelWithFiles
+      const imageUris: string[] = [imagePath];
+  
+>>>>>>> Stashed changes
+
+      const modelAsset = Asset.fromModule(require('/Users/oliverscott/PycharmProjects/KickFlics/assets/model/model.tflite'));
+      await modelAsset.downloadAsync();
+      console.log("test")
+
+      // Run the model with the specified files
+      const results = await TensorflowLite.runModelWithFiles({
+        model: modelAsset.localUri!,  // Using the model asset downloaded earlier
+        files: imageUris
       });
-      const imageBuffer = tf.util.encodeString(image, 'base64').buffer;
-      const rawDataArray = new Uint8Array(imageBuffer);
-      let imageTensor = decodeJpeg(rawDataArray);
-      
-      // Resize, normalise and reshape to same values the model was trained on
-      imageTensor = tf.image.resizeBilinear(imageTensor, [224, 224]);
-      imageTensor = tf.div(imageTensor, tf.scalar(255.0));
-      let processedImageTensor = tf.reshape(imageTensor, [1, 224, 224, 3]);
 
-      // Send tensor to model
-      const prediction = await model.predict(processedImageTensor);      
-      
-      // To negate errors
+      console.log('Results: ', results);
+
+      // Assuming results are returned in a similar structure to the previous implementation
+      // Extracting and processing results might need adjustments based on the actual output of the TensorFlow Lite model
       let modelPrediction;
-      if (Array.isArray(prediction)) {
-        modelPrediction = prediction[0];
+      if (Array.isArray(results)) {
+        modelPrediction = results[0];
       } else {
-        modelPrediction = prediction;
+        modelPrediction = results;
       }
 
-      // Get relevant info from predictionTensor
-      const predictionValues = modelPrediction.arraySync() as number[][][0];
+      // Assuming the prediction values are accessible in a similar way
+      const predictionValues = results[0];
       console.log("Prediction Values: ", predictionValues);
 
-      // 2D -> 1D array
       const flattenedPredictionValues = predictionValues[0] as unknown as number[];
       console.log("Flattened Prediction Values: ",flattenedPredictionValues);
 
-      // Get the highest value index
       const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
       console.log('MaxIndex: ', largestIndex);
 
-      // Find corresponding label
       const predictedLabel = labels[largestIndex];
       console.log("Predicted label: ",  predictedLabel);
 
-      // Set the results
       setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
 
     } catch (err) {
