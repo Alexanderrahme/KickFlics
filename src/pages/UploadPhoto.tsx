@@ -1,22 +1,25 @@
 import React, { useRef, useState, useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, Alert, Pressable} from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
-
-
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import {useNavigation} from "@react-navigation/native";
+import Results from "./Results";
+import ResultsNavigator from "../../ResultsNavigator";
 
 const UploadPhoto: React.FC = () => {
-  
+  const nav = useNavigation();
+
   // Set up relevant variables
   const [TfReady, setTfReady] = useState(false);
   const [result, setResult] = useState('');
   const [pickedImage, setPickedImage] = useState('');
-
+  const [shoe, setShoe] = useState('');
   // Initialise tensorflow
   useEffect(() => {
     const initTF = async () => {
@@ -52,7 +55,7 @@ const UploadPhoto: React.FC = () => {
     try {
       console.log("Starting Model");
       // Load in model
-      const model = await tf.loadLayersModel('C:\Users\jackh\GitHub\KickFlics\src\model\model.json');
+      const model = await tf.loadLayersModel('https://raw.githubusercontent.com/Alexanderrahme/KickFlics/main/src/model/model.json');;
       setTfReady(true);
 
       // Pre-process image
@@ -94,7 +97,7 @@ const UploadPhoto: React.FC = () => {
       // Find corresponding label
       const predictedLabel = labels[largestIndex];
       console.log("Predicted label: ",  predictedLabel);
-
+      setShoe(predictedLabel);
       // Set the results
       setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
 
@@ -103,6 +106,9 @@ const UploadPhoto: React.FC = () => {
     }
   };
 
+  const resultsButtonPress = () => {
+    nav.navigate("Your Flic", {shoe: shoe, pickedImage: pickedImage});
+  };
   return (
     <SafeAreaView style={styles.container}>
           <View
@@ -127,8 +133,12 @@ const UploadPhoto: React.FC = () => {
       <View style={{ width: '100%', height: 20 }} />
       {!TfReady && <Text>Loading model</Text>}
      {TfReady && result === '' && <Text>Upload and classify shoe</Text>}
-      {result !== '' && <Text>{result}</Text>}
-    </View>
+      {result !== '' && <Text>{result}</Text> && (
+      <TouchableOpacity onPress={resultsButtonPress} style={styles.button}>
+        <Text style={styles.buttonText}>See Potential Matches</Text>
+      </TouchableOpacity>)}
+      </View>
+      
       <StatusBar style="auto" />
     </SafeAreaView>
 );
@@ -141,6 +151,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  button: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 18
+  }
 });
 
 export default UploadPhoto;

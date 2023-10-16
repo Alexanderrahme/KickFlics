@@ -20,13 +20,13 @@ const ShoeInfo = () => {
         const apiUrl: string = `https://www.googleapis.com/customsearch/v1?q=${query}&cx=${cx}&key=${apiKey}`;
         
         axios.get(apiUrl).then((response) => {
-            // Extract and set the first search result link
-            const firstResult = response.data.items[0];
-            if (firstResult) {
-              setGoogleSearchLink(firstResult.link);
-            }
-          });
-        }, [shoe.name]);
+          // Extract and set the first search result link
+          const firstResult = response.data.items[0];
+          if (firstResult) {
+            setGoogleSearchLink(firstResult.link);
+          }
+        });
+      }, [shoe.name]);
 
     
     
