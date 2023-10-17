@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, Alert, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
 import * as ImageManipulator from 'expo-image-manipulator';
+import LottieView from 'lottie-react-native';
 
 
 
@@ -18,6 +19,7 @@ const UploadPhoto: React.FC = () => {
   const [TfReady, setTfReady] = useState(false);
   const [result, setResult] = useState('');
   const [pickedImage, setPickedImage] = useState('');
+  const [isLoading, setLoading] = useState(false);
 
   // Initialise tensorflow
   useEffect(() => {
@@ -49,7 +51,6 @@ const UploadPhoto: React.FC = () => {
       );
 
       setPickedImage(jpegImg.uri);
-      classifyPhoto(jpegImg.uri);
     }
 };
 
@@ -58,9 +59,10 @@ const UploadPhoto: React.FC = () => {
     try {
       console.log("Starting Model");
       // Load in model which is hosted on github
-      const model = await tf.loadLayersModel('https://raw.githubusercontent.com/o1100/ShoeModel/main/model.json');
+      const model = await tf.loadLayersModel('https://raw.githubusercontent.com/Alexanderrahme/KickFlics/main/src/model/model.json');
 
       setTfReady(true);
+      setLoading(true);
 
       // Pre-process image
       const image = await FileSystem.readAsStringAsync(imagePath, {
@@ -101,9 +103,11 @@ const UploadPhoto: React.FC = () => {
       // Find corresponding label
       const predictedLabel = labels[largestIndex];
       console.log("Predicted label: ",  predictedLabel);
+      setLoading(false);
 
       // Set the results
       setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
+      
 
     } catch (err) {
       console.log(err);
@@ -112,29 +116,45 @@ const UploadPhoto: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-          <View
-      style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-       justifyContent: 'center',
-      }}
-    >
-      {pickedImage !== '' && (
-        <Image
-          source={{ uri: pickedImage }}
-          style={{ width: 350, height: 350, margin: 40 }}
-        />
-      )}
-      {TfReady && <Button
-        title="Pick an image"
-        onPress={selectImage}
-      /> }
-      <View style={{ width: '100%', height: 20 }} />
-      {!TfReady && <Text>Loading model</Text>}
-     {TfReady && result === '' && <Text>Upload and classify shoe</Text>}
-      {result !== '' && <Text>{result}</Text>}
+        <View style={styles.firstView}>
+          
+          {pickedImage === '' && (
+            <View style={styles.imagePlaceholder}/>
+          )}
+          {pickedImage !== '' && (
+            <Image
+              source={{ uri: pickedImage }}
+              style={styles.image}
+            />
+          )}
+
+      {TfReady && !isLoading && 
+        <View>
+          <TouchableOpacity
+            style={styles.chooseButton}
+            onPress={selectImage}
+            > 
+              <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
+          </TouchableOpacity>
+          {!isLoading && pickedImage !== '' && (
+          <TouchableOpacity
+            style={styles.chooseButton}
+            onPress={() => classifyPhoto(pickedImage)}
+            > 
+              <Text style={styles.chooseButtonTxt}>Search</Text>
+          </TouchableOpacity>
+          )}
+        </View>
+      }
+
+      {isLoading && <LottieView
+        source={require('../../assets/animation_hand.json')}
+        autoPlay
+        loop
+        style={{ width: 300, height: 300 }}
+      />}  
+  
+
     </View>
       <StatusBar style="auto" />
     </SafeAreaView>
@@ -144,10 +164,43 @@ const UploadPhoto: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#9df9ef',
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  firstView:{
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imagePlaceholder:{
+    width: 350, 
+    height: 350, 
+    borderRadius: 5, 
+    backgroundColor: '#eee',
+  },
+  image:{ 
+    width: 350, 
+    height: 350, 
+    borderRadius: 5, 
+  },
+  chooseButton: {
+    width: 350,
+    height: 50,
+    backgroundColor: '#004494',
+    marginTop: 20,
+    borderRadius: 15,
+  },
+  chooseButtonTxt: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 15,
+  },
+
 });
 
 export default UploadPhoto;
