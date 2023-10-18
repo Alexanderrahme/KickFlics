@@ -1,13 +1,21 @@
 import React from 'react';
-import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacityComponent, TouchableOpacityProps } from 'react-native';
 import shoeDatabase from '../data/dummyStoreData';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 
-const StoreCard = () => {
+
+interface StoreCardProps extends TouchableOpacityProps {
+  handleCardPress: (shoe: Shoe) => void;
+}
+
+const StoreCard: React.FC<StoreCardProps> = ({ handleCardPress }) => {
+  const nav = useNavigation();
+  
   return (
     <ScrollView>
       {shoeDatabase.map((shoe) => (
-        <TouchableOpacity key={shoe.id} style={styles.card}>
+        <TouchableOpacity key={shoe.id} style={styles.card} onPress={() => handleCardPress(shoe)}>
           <Image source={shoe.image} style={styles.cardImage}/>
           <View style={styles.infoContainer}>
             <Text style={styles.name}>Name: {shoe.name}</Text>
