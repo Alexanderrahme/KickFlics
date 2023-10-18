@@ -22,12 +22,7 @@ const TakePhoto: React.FC = () => {
   const [hasMediaLibraryPermissions, setHasMediaLibraryPermission] = useState<boolean | undefined>(undefined);
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
 
-  // This needs to change once we are predicting a shoe and not usign a dummy model
-  // Need to change <number |null> to string or object, as the prediction probably wont be of type number
-  const [prediction, setPrediction] = useState<number>();
-
-
-
+  
   useEffect(() => {
     (async () => {
       try {
