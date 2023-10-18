@@ -16,22 +16,6 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import axios from 'axios';
 import LottieView from 'lottie-react-native';
 
-
-
-  import React, { useRef, useState, useEffect } from "react";
-  import { StatusBar } from 'expo-status-bar';
-  import { StyleSheet, Text, View, Button, Image, Alert, Pressable} from 'react-native';
-  import { SafeAreaView } from "react-native-safe-area-context";
-  import * as tf from '@tensorflow/tfjs';
-  import { decodeJpeg } from '@tensorflow/tfjs-react-native';
-  import * as ImagePicker from 'expo-image-picker';
-  import * as FileSystem from 'expo-file-system';
-  import labels from '../model/labels.json';
-  import { TouchableOpacity } from 'react-native-gesture-handler';
-  import {useNavigation} from "@react-navigation/native";
-  import Results from "./Results";
-  import ResultsNavigator from "../../ResultsNavigator";
-
 const UploadPhoto: React.FC = () => {
   const nav = useNavigation();
 
@@ -103,7 +87,7 @@ const UploadPhoto: React.FC = () => {
         const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
         console.log('MaxIndex: ', largestIndex);
         // Set the probability value
-        setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(4) + '%');
+        // setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(4) + '%');
 
       // Find corresponding label
       const predictedLabel = labels[largestIndex];
