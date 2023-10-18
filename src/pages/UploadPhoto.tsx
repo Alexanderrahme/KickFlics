@@ -8,15 +8,9 @@ import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
-<<<<<<< Updated upstream
-=======
 import * as ImageManipulator from 'expo-image-manipulator';
-import TensorflowLite from "@switt/react-native-tensorflow-lite";
-// import Tflite from 'tflite-react-native';
+import axios from 'axios';
 
-
-
->>>>>>> Stashed changes
 
 
 
@@ -30,8 +24,8 @@ const UploadPhoto: React.FC = () => {
   // Initialise tensorflow
   useEffect(() => {
     const initTFLite = async () => {
-      const modelAsset = Asset.fromModule(require('/Users/oliverscott/PycharmProjects/KickFlics/assets/model/model.tflite'));
-      await modelAsset.downloadAsync();
+      await tf.ready();
+
       setTfReady(true);
     };
 
@@ -45,75 +39,60 @@ const UploadPhoto: React.FC = () => {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
-      //   base64: true
+      base64: true
       // with base64 we can skip some of the pre-processing later on
-      // incorporate this later
     });
   
     // Pass selected image to ML function and view
     if (result.assets && result.assets.length > 0) {
       const imagePath = result.assets[0].uri;
-      setPickedImage(imagePath);
-      classifyPhoto(imagePath);
+      setPickedImage(imagePath)
+
+      const base64Data = result.assets[0].base64;
+      
+
+      if (base64Data) {
+        classifyPhoto(base64Data);
+      } else {
+        console.error('Error line 57');
+      }
   }
   };
 
 
-  // interface with tensorflow model
-  const classifyPhoto = async (imagePath: string) => {
-    try {
-      console.log("Starting Model");
-<<<<<<< Updated upstream
-      // Load in model
-      const model = await tf.loadLayersModel('file:///src/model/model.json');
-      setTfReady(true);
-=======
-
-      // Ensure the image path is in an array as required by runModelWithFiles
-      const imageUris: string[] = [imagePath];
+  // Sends image data to cloud
+  const classifyPhoto = async (base64Data: string) => {
+    try {      
+      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
+      const imageData = {
+        image: base64Data,
+      };
   
->>>>>>> Stashed changes
-
-      const modelAsset = Asset.fromModule(require('/Users/oliverscott/PycharmProjects/KickFlics/assets/model/model.tflite'));
-      await modelAsset.downloadAsync();
-      console.log("test")
-
-      // Run the model with the specified files
-      const results = await TensorflowLite.runModelWithFiles({
-        model: modelAsset.localUri!,  // Using the model asset downloaded earlier
-        files: imageUris
-      });
-
-      console.log('Results: ', results);
-
-      // Assuming results are returned in a similar structure to the previous implementation
-      // Extracting and processing results might need adjustments based on the actual output of the TensorFlow Lite model
-      let modelPrediction;
-      if (Array.isArray(results)) {
-        modelPrediction = results[0];
-      } else {
-        modelPrediction = results;
-      }
-
-      // Assuming the prediction values are accessible in a similar way
-      const predictionValues = results[0];
-      console.log("Prediction Values: ", predictionValues);
-
-      const flattenedPredictionValues = predictionValues[0] as unknown as number[];
-      console.log("Flattened Prediction Values: ",flattenedPredictionValues);
-
-      const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
-      console.log('MaxIndex: ', largestIndex);
-
-      const predictedLabel = labels[largestIndex];
-      console.log("Predicted label: ",  predictedLabel);
-
-      setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
-
+      console.log("Sending data")
+      const response = await axios.post(url, imageData);
+      console.log(response.data);
+  
     } catch (err) {
       console.log(err);
     }
   };
+
+ // Tests communicating with cloud
+// const classifyPhoto = async (imagePath: string) => {
+//   try {
+//     console.log("Pre processing data");
+
+//       const jsonData = {
+//         name: 'Oliver', 
+//     };
+//     let testUrl = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/TestReact';
+//     const response = await axios.post(testUrl, jsonData);
+//     console.log(response.data);
+
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 
   return (
     <SafeAreaView style={styles.container}>

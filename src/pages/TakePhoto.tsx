@@ -8,6 +8,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 //import { createModel } from "../models/DUMMYMODEL";
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
+import axios from 'axios';
+
 
 interface PhotoType {
   uri: string;
@@ -56,17 +58,34 @@ const TakePhoto: React.FC = () => {
         const picture = await cameraRef.current.takePictureAsync(options);
         setPhoto(picture);
 
-        analysePhoto(picture);
+        if (picture.base64) {
+          classifyPhoto(picture.base64);
+        } else {
+          console.error("Fail on line 64");
+        }
       }
     } catch (error) {
       console.error("Error taking picture", error);
     }
   };
 
-  const analysePhoto = async (picture: PhotoType) => {
-    // Link to the same thing as in upload Photo
+
+  // Sends image data to cloud
+  const classifyPhoto = async (base64Data: string) => {
+    try {      
+      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
+      const imageData = {
+        image: base64Data,
+      };
   
-};
+      console.log("Sending data")
+      const response = await axios.post(url, imageData);
+      console.log(response.data);
+  
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   
 
@@ -74,7 +93,7 @@ const TakePhoto: React.FC = () => {
     if (photo?.uri) {
       try {
         await MediaLibrary.saveToLibraryAsync(photo.uri);
-        Alert.alert("Fuck Yeah", "Scanning yo shoes.");
+        Alert.alert("Alert", "Scanning yo shoes.");
         setPhoto(undefined);
       } catch (error) {
         console.error("Error saving photo", error);
