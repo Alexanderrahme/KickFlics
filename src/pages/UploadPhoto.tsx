@@ -55,7 +55,7 @@ const UploadPhoto: React.FC = () => {
 };
 
   // interface with tensorflow model
-  const classifyPhoto = async (imagePath: string) => {
+  const classifyPhoto = async (imagePath: string) => {// change this
     try {
       console.log("Starting Model");
       // Load in model which is hosted on github
