@@ -27,7 +27,8 @@ const UploadPhoto: React.FC = () => {
   const [result, setResult] = useState('');
   const [pickedImage, setPickedImage] = useState('');
   const [shoe, setShoe] = useState('');
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
+
 
   // Initialise tensorflow
   useEffect(() => {
@@ -70,6 +71,7 @@ const UploadPhoto: React.FC = () => {
 
   // Sends image data to cloud
   const classifyPhoto = async (base64Data: string) => {
+    setisLoading(true);
     try {      
       let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
       const imageData = {
@@ -79,28 +81,27 @@ const UploadPhoto: React.FC = () => {
       console.log("Sending data")
       const response = await axios.post(url, imageData);
       console.log(response.data);
+      let array = response.data["prediction"]
+
+      const flattenedPredictionValues = array[0] as unknown as number[];
+      console.log("Flattened Prediction Values: ",flattenedPredictionValues);
+
+      // Get the highest value index
+      const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
+      console.log('MaxIndex: ', largestIndex);
+
+      // Find corresponding label
+      const predictedLabel = labels[largestIndex];
+      console.log("Predicted label: ",  predictedLabel);
+
+      setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
+      setShoe(predictedLabel);
+      setisLoading(false);
   
     } catch (err) {
       console.log(err);
     }
   };
-
- // Tests communicating with cloud
-// const classifyPhoto = async (imagePath: string) => {
-//   try {
-//     console.log("Pre processing data");
-
-//       const jsonData = {
-//         name: 'Oliver', 
-//     };
-//     let testUrl = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/TestReact';
-//     const response = await axios.post(testUrl, jsonData);
-//     console.log(response.data);
-
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
 
 
   const resultsButtonPress = () => {
@@ -108,36 +109,9 @@ const UploadPhoto: React.FC = () => {
     (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
 
   };
+  
   return (
     <SafeAreaView style={styles.container}>
-          <View
-      style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-       justifyContent: 'center',
-      }}
-    >
-      {pickedImage !== '' && (
-        <Image
-          source={{ uri: pickedImage }}
-          style={{ width: 350, height: 350, margin: 40 }}
-        />
-      )}
-      {TfReady && <Button
-        title="Pick an image"
-        onPress={selectImage}
-      /> }
-      <View style={{ width: '100%', height: 20 }} />
-      {!TfReady && <Text>Loading model</Text>}
-     {TfReady && result === '' && <Text>Upload and classify shoe</Text>}
-      {result !== '' && <Text>{result}</Text> && (
-      <TouchableOpacity onPress={resultsButtonPress} style={styles.button}>
-        <Text style={styles.buttonText}>See Potential Matches</Text>
-      </TouchableOpacity>)}
-      </View>
-      
         <View style={styles.firstView}>
           
           {pickedImage === '' && (
@@ -158,12 +132,13 @@ const UploadPhoto: React.FC = () => {
             > 
               <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
           </TouchableOpacity>
+
           {!isLoading && pickedImage !== '' && (
           <TouchableOpacity
             style={styles.chooseButton}
-            onPress={() => classifyPhoto(pickedImage)}
+            onPress={() => resultsButtonPress()}
             > 
-              <Text style={styles.chooseButtonTxt}>Search</Text>
+              <Text style={styles.chooseButtonTxt}>See Results</Text>
           </TouchableOpacity>
           )}
         </View>
@@ -173,7 +148,7 @@ const UploadPhoto: React.FC = () => {
         source={require('../../assets/animation_hand.json')}
         autoPlay
         loop
-        style={{ width: 300, height: 300 }}
+        style={{ paddingTop: 25, width: 300, height: 300, backgroundColor: 'black'}}
       />}  
   
 
