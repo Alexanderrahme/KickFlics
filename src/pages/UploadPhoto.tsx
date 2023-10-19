@@ -18,20 +18,25 @@ import LottieView from 'lottie-react-native';
 
 const UploadPhoto: React.FC = () => {
   const nav = useNavigation();
+  const animationRef = useRef<LottieView>(null);
 
   // Set up relevant variables
   const [TfReady, setTfReady] = useState(false);
   const [result, setResult] = useState('');
+  const [isResult, setIsResult] = useState(false);
   const [pickedImage, setPickedImage] = useState('');
   const [shoe, setShoe] = useState('');
   const [isLoading, setisLoading] = useState(false);
+  //const [data, setData] = useState<string | null | undefined>(null);
 
+  useEffect(() => {
+    animationRef.current?.play();
+  }, []);
 
   // Initialise tensorflow
   useEffect(() => {
     const initTFLite = async () => {
       await tf.ready();
-
       setTfReady(true);
     };
 
@@ -55,9 +60,11 @@ const UploadPhoto: React.FC = () => {
       setPickedImage(imagePath)
 
       const base64Data = result.assets[0].base64;
+      const data = result.assets[0].base64;
       
 
       if (base64Data) {
+        //console.log("Base64 data: ", base64Data);
         classifyPhoto(base64Data);
       } else {
         console.error('Error line 57');
@@ -94,12 +101,14 @@ const UploadPhoto: React.FC = () => {
       console.log("Predicted label: ",  predictedLabel);
 
       setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
+      setIsResult(true);
       setShoe(predictedLabel);
       setisLoading(false);
   
     } catch (err) {
       console.log(err);
     }
+
   };
 
 
@@ -113,6 +122,12 @@ const UploadPhoto: React.FC = () => {
     <SafeAreaView style={styles.container}>
         <View style={styles.firstView}>
           
+          {isResult && (
+            <View>
+              <Text style={styles.matchFoundText}>Match Found!</Text>
+            </View>
+          )}
+
           {pickedImage === '' && (
             <View style={styles.imagePlaceholder}/>
           )}
@@ -123,31 +138,41 @@ const UploadPhoto: React.FC = () => {
             />
           )}
 
-      {TfReady && !isLoading && 
-        <View>
-          <TouchableOpacity
-            style={styles.chooseButton}
-            onPress={selectImage}
-            > 
-              <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
-          </TouchableOpacity>
+         {TfReady && !isLoading && 
+          <View>
+            <TouchableOpacity
+              style={styles.chooseButton}
+              onPress={selectImage}
+              > 
+                <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
+            </TouchableOpacity>
 
-          {!isLoading && pickedImage !== '' && (
-          <TouchableOpacity
-            style={styles.chooseButton}
-            onPress={() => resultsButtonPress()}
-            > 
-              <Text style={styles.chooseButtonTxt}>See Results</Text>
-          </TouchableOpacity>
-          )}
-        </View>
+            {!isLoading && pickedImage !== '' &&(
+              <TouchableOpacity
+                style={styles.chooseButton}
+                //onPress={() => classifyPhoto(data)}
+                > 
+                  <Text style={styles.chooseButtonTxt}>Begin Search</Text>
+              </TouchableOpacity>
+            )}
+            {!isLoading && isResult && (
+            <TouchableOpacity
+              style={styles.chooseButton}
+              onPress={() => resultsButtonPress()}
+              > 
+                <Text style={styles.chooseButtonTxt}>See Results</Text>
+            </TouchableOpacity>
+            )}
+          </View>
       }
-
+      
       {isLoading && <LottieView
         source={require('../../assets/animation_hand.json')}
-        autoPlay
-        loop
-        style={{ paddingTop: 25, width: 300, height: 300, backgroundColor: 'black'}}
+        autoPlay={true}
+        loop={true}
+        ref = {animationRef}
+        speed={1}
+        style={{width: 300, height: 300}}
       />}  
   
 
@@ -164,6 +189,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  matchFoundText:{
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginTop: 20, 
+    marginBottom: 20,
   },
   buttonText: {
     color: 'white',

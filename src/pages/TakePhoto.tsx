@@ -2,13 +2,14 @@ import React, { useRef, useState, useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from "@react-navigation/native";
 import { Camera } from 'expo-camera';
-import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, Alert, Pressable } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
 //import { createModel } from "../models/DUMMYMODEL";
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import axios from 'axios';
+import { Ionicons } from '@expo/vector-icons'; 
 
 
 interface PhotoType {
@@ -16,12 +17,19 @@ interface PhotoType {
   base64?: string;
 }
 
+enum CameraType{
+  back = 'back',
+  front = 'front',
+}
+
 const TakePhoto: React.FC = () => {
   const cameraRef = useRef<Camera | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
   const [hasMediaLibraryPermissions, setHasMediaLibraryPermission] = useState<boolean | undefined>(undefined);
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
+  const [type, setType] = useState(CameraType.back);
 
+  const nav = useNavigation();
   
   useEffect(() => {
     (async () => {
@@ -83,6 +91,11 @@ const TakePhoto: React.FC = () => {
   };
 
   
+  const switchCamera = () => {
+    setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+    console.log(type);
+  };
+
 
   const savePhoto = async () => {
     if (photo?.uri) {
@@ -97,6 +110,10 @@ const TakePhoto: React.FC = () => {
     }
   };
 
+  const cancelButton = () => {
+    (nav.navigate as any)("Home");
+  }
+
   if (photo) {
     return (
       <SafeAreaView style={styles.photo}>
@@ -109,11 +126,22 @@ const TakePhoto: React.FC = () => {
   }
 
   return (
-    <Camera ref={cameraRef} style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Button title="Take Picture" onPress={takePicture} />
-      </View>
-      <StatusBar style='auto' />
+    <Camera ref={cameraRef} style={styles.container} type={type}>
+        <View style={styles.topContainer}>
+
+        </View>
+        <View style={styles.bottomContainer}>
+          <Pressable onPress={cancelButton}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </Pressable>
+          <Pressable 
+            style={styles.takePictureButton}
+            onPress={takePicture} 
+          />
+          <Pressable onPress={switchCamera}>
+            <Ionicons name="camera-reverse-outline" size={24} color="white" />
+        </Pressable>
+        </View>
     </Camera>
   );
 }
@@ -132,7 +160,34 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginBottom: '10%',
-  }
+  },
+  topContainer:{
+    backgroundColor: '#171717',
+    width: '100%',
+    height: '15%',
+    marginBottom: 450,
+  },
+  takePictureButton: {
+    backgroundColor: 'white',
+    marginBottom: '15%',
+    // alignSelf: 'center',
+    height: 70,
+    width: 70, 
+    borderRadius: 50,
+    marginTop: 50, 
+  },
+  cancelText:{
+    color: 'white',
+    fontSize: 16,
+  },
+  bottomContainer:{
+    backgroundColor: '#171717',
+    width: '100%',
+    height: '25%',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: "space-around",
+  },
 });
 
 export default TakePhoto;
