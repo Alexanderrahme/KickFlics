@@ -18,30 +18,50 @@ const Results = () => {
     useEffect(() => {
         const apiKey: string = 'AIzaSyCncv7v2o2S-8nNLEwiVs28pTBTYVdxE5g'; 
         const cx: string = 'a259cb0bd727843c2'; 
-        const query = encodeURIComponent(`${shoe} sneakers`);
+        const query = encodeURIComponent(`buy ${shoe} sneakers`);
 
         const apiUrl: string = `https://www.googleapis.com/customsearch/v1?q=${query}&cx=${cx}&key=${apiKey}`;
         
         axios.get(apiUrl).then((response) => {
-            // Extract and set the first search result link
             if (response.data && response.data.items && response.data.items.length >= 4) {
-                const firstFourResults = response.data.items.slice(0, 4); // Get the first 4 items from the API response
-          
-                const links = firstFourResults.map(item => item.link); // Extract links from the first 4 items
-                setGoogleSearchLinks(links); 
+                const uniqueLinks = new Set();
 
-                const updatedResultsData = firstFourResults.map((item, index) => ({
+                for (let i = 0; i < response.data.items.length; i++) {
+                    const object = response.data.items[i];
+                    const dotIndex1 = object.link.indexOf('.');
+                    const dotIndex2 = object.link.indexOf('.', dotIndex1 + 1);
+                    if (dotIndex2 !== -1) {
+                        const substring = object.link.substring(0, dotIndex2);
+        
+                        let isUnique = true;
+                        for (const link of uniqueLinks) {
+                            const existingDotIndex2 = link.indexOf('.', link.indexOf('.') + 1);
+                            const existingSubstring = link.substring(0, existingDotIndex2);
+                            if (substring === existingSubstring) {
+                                isUnique = false;
+                                break;
+                            }
+                        }
+        
+                        if (isUnique && uniqueLinks.size < 4) {
+                            uniqueLinks.add(object.link);
+                        } else if (uniqueLinks.size >= 4) {
+                            break; // Break the loop if uniqueLinks size is 4 or more
+                        }
+                    }
+                }
+
+                const updatedResultsData = Array.from(uniqueLinks).map((link, index) => ({
                     id: index + 1,
-                    image: item.image?.thumbnailLink || '',
-                    link: item.link, // Use the link as text, you can customize this property as needed
-                    
+                    image: '', 
+                    link: link,
                 }));
-    
+
                 setResultsData(updatedResultsData);
             }
         });
-      }, [shoe]);
-
+    }, [shoe]);
+    
     const handleLinkPress = (url) => {
         Linking.openURL(url);
         
