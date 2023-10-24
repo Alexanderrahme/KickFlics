@@ -1,42 +1,42 @@
-{
-  "expo": {
-    "name": "Innovation",
-    "slug": "Innovation",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "userInterfaceStyle": "light",
-    "assetBundlePatterns": [
-      "**/*",
-      "src/model/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSCameraUsageDescription": "$KickFlics needs access to your Camera."
+    {
+      "expo": {
+        "name": "Innovation",
+        "slug": "Innovation",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "userInterfaceStyle": "light",
+        "assetBundlePatterns": [
+          "**/*",
+          "src/model/*"
+        ],
+        "ios": {
+          "supportsTablet": true,
+          "infoPlist": {
+            "NSCameraUsageDescription": "$KickFlics needs access to your Camera."
+          },
+          "bundleIdentifier": "i"
+        },
+        "android": {
+          "permissions": [
+            "android.permission.CAMERA"
+          ]
+        },
+        "plugins": [
+          [
+            "react-native-vision-camera",
+            {
+              "cameraPermissionText": "$KickFlics needs access to your Camera."
+            }
+          ],
+          [
+            "expo-media-library",
+            {
+              "photosPermission": "Allow $KickFlics) to access your photos.",
+              "savePhotosPermission": "Allow $KickFlics to save photos.",
+              "isAccessMediaLocationEnabled": "true"
+            }
+          ]
+        ]
       },
-      "bundleIdentifier": "i"
-    },
-    "android": {
-      "permissions": [
-        "android.permission.CAMERA"
-      ]
-    },
-    "plugins": [
-      [
-        "react-native-vision-camera",
-        {
-          "cameraPermissionText": "$KickFlics needs access to your Camera."
-        }
-      ],
-      [
-        "expo-media-library",
-        {
-          "photosPermission": "Allow $KickFlics) to access your photos.",
-          "savePhotosPermission": "Allow $KickFlics to save photos.",
-          "isAccessMediaLocationEnabled": "true"
-        }
-      ]
-    ]
-  },
-  "web": {}
-}
+      "web": {}
+    }

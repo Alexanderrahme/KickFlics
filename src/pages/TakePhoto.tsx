@@ -6,8 +6,14 @@ import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
 //import { createModel } from "../models/DUMMYMODEL";
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
+import CameraNavigator from "../../CameraNavigator";
+import labels from '../model/labels.json';
+import Results from "./Results";
+import axios from 'axios';
+
 
 interface PhotoType {
   uri: string;
@@ -19,13 +25,17 @@ const TakePhoto: React.FC = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
   const [hasMediaLibraryPermissions, setHasMediaLibraryPermission] = useState<boolean | undefined>(undefined);
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
+  const [isLoading, setisLoading] = useState(false);
+  const [result, setResult] = useState('');
+  const [prob, setProb] = useState('');
+  const [shoe, setShoe] = useState('');
+  const nav = useNavigation();
+  const [TfReady, setTfReady] = useState(false);
 
-  // This needs to change once we are predicting a shoe and not usign a dummy model
-  // Need to change <number |null> to string or object, as the prediction probably wont be of type number
-  const [prediction, setPrediction] = useState<number>();
 
 
 
+  
   useEffect(() => {
     (async () => {
       try {
@@ -56,25 +66,70 @@ const TakePhoto: React.FC = () => {
         const picture = await cameraRef.current.takePictureAsync(options);
         setPhoto(picture);
 
-        analysePhoto(picture);
+        if (picture.base64) {
+          classifyPhoto(picture.base64);
+        } else {
+          console.error("Fail on line 64");
+        }
       }
     } catch (error) {
       console.error("Error taking picture", error);
     }
   };
 
-  const analysePhoto = async (picture: PhotoType) => {
-    // Link to the same thing as in upload Photo
-  
-};
 
+  // Sends image data to cloud
+  const classifyPhoto = async (base64Data: string) => {
+    setisLoading(true);
+    try {      
+      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
+      const imageData = {
+        image: base64Data,
+      };
   
+      console.log("Sending data")
+      const response = await axios.post(url, imageData);
+      console.log(response.data);
+      let array = response.data["prediction"]
+  
+      const flattenedPredictionValues = array[0] as unknown as number[];
+      console.log("Flattened Prediction Values: ", flattenedPredictionValues);
+  
+        // Get the highest value index
+        const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
+        console.log('MaxIndex: ', largestIndex);
+        // Set the probability value
+        setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(2) + '%');
+  
+      // Find corresponding label
+      const predictedLabel = labels[largestIndex];
+      console.log("Predicted label: ", predictedLabel);
+  
+      setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
+      setShoe(predictedLabel);
+      setisLoading(false);
+  
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const getPhotoUri = (photo: PhotoType | undefined): string | undefined => {
+    return photo?.uri || undefined;
+  };
+
+  const pickedImage = getPhotoUri(photo);
+
+  const resultsButtonPress = () => {
+    nav.navigate("Your Flic", {shoe: shoe, prob: prob, pickedImage: pickedImage});
+
+  };
 
   const savePhoto = async () => {
     if (photo?.uri) {
       try {
         await MediaLibrary.saveToLibraryAsync(photo.uri);
-        Alert.alert("Fuck Yeah", "Scanning yo shoes.");
+        Alert.alert("Alert", "Scanning yo shoes.");
         setPhoto(undefined);
       } catch (error) {
         console.error("Error saving photo", error);
@@ -83,16 +138,24 @@ const TakePhoto: React.FC = () => {
     }
   };
 
+
   if (photo) {
     return (
       <SafeAreaView style={styles.photo}>
         <Image style={styles.photo} source={{ uri: photo.uri }} />
         {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
-        {<Text>Prediction: </Text>}
+        <Image style={styles.photo} source={{ uri: photo.uri }} />
+          <View>
+              <TouchableOpacity style={styles.chooseButton} onPress={() => resultsButtonPress()}>
+                <Text style={styles.chooseButtonTxt}>See Results</Text>
+              </TouchableOpacity>
+          </View>
+          <Text>Prediction: </Text>
         <Button title="Retry" onPress={() => setPhoto(undefined)} />
       </SafeAreaView>
     );
   }
+
 
   return (
     <Camera ref={cameraRef} style={styles.container}>
@@ -102,7 +165,10 @@ const TakePhoto: React.FC = () => {
       <StatusBar style='auto' />
     </Camera>
   );
-}
+
+
+};
+
 
 const styles = StyleSheet.create({
   container: {
@@ -114,7 +180,22 @@ const styles = StyleSheet.create({
     marginBottom: '10%',
     alignSelf: 'center',
   },
-  photo: {
+
+  chooseButton: {
+    width: 350,
+    height: 50,
+    backgroundColor: '#004494',
+    marginTop: 20,
+    borderRadius: 15,
+  },
+  chooseButtonTxt: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 15,
+  },
+    photo: {
     flex: 1,
     alignItems: 'center',
     marginBottom: '10%',

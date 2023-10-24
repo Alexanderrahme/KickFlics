@@ -35,6 +35,13 @@ type Shoe = {
       description: "The versatile Vans Authentics, great for skateboarding or casual wear.",
       image: require("../../assets/images/Vans_Old_Skool.png"),
     },
+    {
+      id: "5",
+      name: "Under Amour Ripple 2.0",
+      price: 125,
+      description: "",
+      image: require("../../assets/images/Under_Armour_Ripple.png"),
+    },
   ];
   
   export default shoeDatabase;

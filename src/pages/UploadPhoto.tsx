@@ -1,34 +1,42 @@
 import React, { useRef, useState, useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Image, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, Alert, Pressable} from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Asset } from 'expo-asset';
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import {useNavigation} from "@react-navigation/native";
+import Results from "./Results";
+import ResultsNavigator from "../../ResultsNavigator";
 import * as ImageManipulator from 'expo-image-manipulator';
+import axios from 'axios';
 import LottieView from 'lottie-react-native';
 
-
-
-
 const UploadPhoto: React.FC = () => {
-  
+  const nav = useNavigation();
+
   // Set up relevant variables
   const [TfReady, setTfReady] = useState(false);
   const [result, setResult] = useState('');
   const [pickedImage, setPickedImage] = useState('');
-  const [isLoading, setLoading] = useState(false);
+  const [shoe, setShoe] = useState('');
+  const [isLoading, setisLoading] = useState(false);
+  const [prob, setProb] = useState('');
+
 
   // Initialise tensorflow
   useEffect(() => {
-    const initTF = async () => {
+    const initTFLite = async () => {
       await tf.ready();
+
       setTfReady(true);
     };
 
-    initTF();
+    initTFLite();
   }, []);
 
   // Allows a user to upload an image from their camera roll
@@ -38,82 +46,69 @@ const UploadPhoto: React.FC = () => {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true
+      // with base64 we can skip some of the pre-processing later on
     });
-
+  
+    // Pass selected image to ML function and view
     if (result.assets && result.assets.length > 0) {
       const imagePath = result.assets[0].uri;
+      setPickedImage(imagePath)
 
-      // Convert the image to jpg format
-      const jpegImg = await ImageManipulator.manipulateAsync(
-        imagePath,
-        [],
-        { format: ImageManipulator.SaveFormat.JPEG }
-      );
-
-      setPickedImage(jpegImg.uri);
-    }
-};
-
-  // interface with tensorflow model
-  const classifyPhoto = async (imagePath: string) => {
-    try {
-      console.log("Starting Model");
-      // Load in model which is hosted on github
-      const model = await tf.loadLayersModel('https://raw.githubusercontent.com/Alexanderrahme/KickFlics/main/src/model/model.json');
-
-      setTfReady(true);
-      setLoading(true);
-
-      // Pre-process image
-      const image = await FileSystem.readAsStringAsync(imagePath, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      const imageBuffer = tf.util.encodeString(image, 'base64').buffer;
-      const rawDataArray = new Uint8Array(imageBuffer);
-      let imageTensor = decodeJpeg(rawDataArray);
+      const base64Data = result.assets[0].base64;
       
-      // Resize, normalise and reshape to same values the model was trained on
-      imageTensor = tf.image.resizeBilinear(imageTensor, [224, 224]);
-      imageTensor = tf.div(imageTensor, tf.scalar(255.0));
-      let processedImageTensor = tf.reshape(imageTensor, [1, 224, 224, 3]);
 
-      // Send tensor to model
-      const prediction = await model.predict(processedImageTensor);      
-      
-      // To negate errors
-      let modelPrediction;
-      if (Array.isArray(prediction)) {
-        modelPrediction = prediction[0];
+      if (base64Data) {
+        classifyPhoto(base64Data);
       } else {
-        modelPrediction = prediction;
+        console.error('Error line 57');
       }
+  }
+  };
 
-      // Get relevant info from predictionTensor
-      const predictionValues = modelPrediction.arraySync() as number[][][0];
-      console.log("Prediction Values: ", predictionValues);
 
-      // 2D -> 1D array
-      const flattenedPredictionValues = predictionValues[0] as unknown as number[];
+  // Sends image data to cloud
+  const classifyPhoto = async (base64Data: string) => {
+    setisLoading(true);
+    try {      
+      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
+      const imageData = {
+        image: base64Data,
+      };
+  
+      console.log("Sending data")
+      const response = await axios.post(url, imageData);
+      console.log(response.data);
+      let array = response.data["prediction"]
+
+      const flattenedPredictionValues = array[0] as unknown as number[];
       console.log("Flattened Prediction Values: ",flattenedPredictionValues);
 
-      // Get the highest value index
-      const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
-      console.log('MaxIndex: ', largestIndex);
+        // Get the highest value index
+        const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
+        console.log('MaxIndex: ', largestIndex);
+        // Set the probability value
+        setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(2) + '%');
 
       // Find corresponding label
       const predictedLabel = labels[largestIndex];
       console.log("Predicted label: ",  predictedLabel);
-      setLoading(false);
 
-      // Set the results
       setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
-      
-
+      setShoe(predictedLabel);
+      setisLoading(false);
+  
     } catch (err) {
       console.log(err);
     }
   };
 
+
+  const resultsButtonPress = () => {
+    nav.navigate("Your Flic", {shoe: shoe, prob: prob, pickedImage: pickedImage});
+
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
         <View style={styles.firstView}>
@@ -136,12 +131,13 @@ const UploadPhoto: React.FC = () => {
             > 
               <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
           </TouchableOpacity>
+
           {!isLoading && pickedImage !== '' && (
           <TouchableOpacity
             style={styles.chooseButton}
-            onPress={() => classifyPhoto(pickedImage)}
+            onPress={() => resultsButtonPress()}
             > 
-              <Text style={styles.chooseButtonTxt}>Search</Text>
+              <Text style={styles.chooseButtonTxt}>See Results</Text>
           </TouchableOpacity>
           )}
         </View>
@@ -151,16 +147,17 @@ const UploadPhoto: React.FC = () => {
         source={require('../../assets/animation_hand.json')}
         autoPlay
         loop
-        style={{ width: 300, height: 300 }}
+        style={{ paddingTop: 25, width: 300, height: 300, backgroundColor: 'black'}}
       />}  
   
 
     </View>
       <StatusBar style="auto" />
     </SafeAreaView>
-);
+  );
 };
 
+  
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -168,12 +165,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 18
+  },
   firstView:{
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
   },
   imagePlaceholder:{
     width: 350, 
@@ -203,4 +210,5 @@ const styles = StyleSheet.create({
 
 });
 
-export default UploadPhoto;
+
+  export default UploadPhoto;
