@@ -1,13 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
-import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from "@react-navigation/native";
 import { Camera } from 'expo-camera';
 import { StyleSheet, Text, View, Button, Image, Alert, Pressable } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
-//import { createModel } from "../models/DUMMYMODEL";
-import * as tf from '@tensorflow/tfjs';
-import { decodeJpeg } from '@tensorflow/tfjs-react-native';
+import labels from '../model/labels.json';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons'; 
 
@@ -47,7 +44,7 @@ const TakePhoto: React.FC = () => {
   }, []);
 
   if (hasCameraPermission === false) {
-    return <Text>Permission for camera not granted. Please change this in settings</Text>;
+    return <Text>Permission for camera not granted.</Text>;
   }
 
   const takePicture = async () => {
@@ -84,11 +81,28 @@ const TakePhoto: React.FC = () => {
       console.log("Sending data")
       const response = await axios.post(url, imageData);
       console.log(response.data);
+      let array = response.data["prediction"]
+
+      const flattenedPredictionValues = array[0] as unknown as number[];
+      console.log("Flattened Prediction Values: ",flattenedPredictionValues);
+
+        // Get the highest value index
+      const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
+      console.log('MaxIndex: ', largestIndex);
+
+      // Find corresponding label
+      const predictedLabel = labels[largestIndex];
+      console.log("Predicted label: ",  predictedLabel);
   
     } catch (err) {
       console.log(err);
     }
   };
+
+
+
+
+
 
   
   const switchCamera = () => {

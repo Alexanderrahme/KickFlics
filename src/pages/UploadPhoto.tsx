@@ -2,9 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, Image, Alert, Pressable} from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Asset } from 'expo-asset';
 import * as tf from '@tensorflow/tfjs';
-import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
@@ -12,7 +10,6 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import {useNavigation} from "@react-navigation/native";
 import Results from "./Results";
 import ResultsNavigator from "../../ResultsNavigator";
-import * as ImageManipulator from 'expo-image-manipulator';
 import axios from 'axios';
 import LottieView from 'lottie-react-native';
 
@@ -27,7 +24,6 @@ const UploadPhoto: React.FC = () => {
   const [pickedImage, setPickedImage] = useState('');
   const [shoe, setShoe] = useState('');
   const [isLoading, setisLoading] = useState(false);
-  //const [data, setData] = useState<string | null | undefined>(null);
 
   useEffect(() => {
     animationRef.current?.play();
@@ -51,7 +47,6 @@ const UploadPhoto: React.FC = () => {
       aspect: [4, 3],
       quality: 1,
       base64: true
-      // with base64 we can skip some of the pre-processing later on
     });
   
     // Pass selected image to ML function and view
@@ -64,7 +59,6 @@ const UploadPhoto: React.FC = () => {
       
 
       if (base64Data) {
-        //console.log("Base64 data: ", base64Data);
         classifyPhoto(base64Data);
       } else {
         console.error('Error line 57');
@@ -90,11 +84,10 @@ const UploadPhoto: React.FC = () => {
       const flattenedPredictionValues = array[0] as unknown as number[];
       console.log("Flattened Prediction Values: ",flattenedPredictionValues);
 
-        // Get the highest value index
-        const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
-        console.log('MaxIndex: ', largestIndex);
-        // Set the probability value
-        // setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(4) + '%');
+      // Get the highest value index
+      const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
+      console.log('MaxIndex: ', largestIndex);
+      // Set the probability value
 
       // Find corresponding label
       const predictedLabel = labels[largestIndex];
@@ -113,7 +106,6 @@ const UploadPhoto: React.FC = () => {
 
 
   const resultsButtonPress = () => {
-    // nav.navigate("Your Flic", {shoe: shoe, pickedImage: pickedImage});
     (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
 
   };
