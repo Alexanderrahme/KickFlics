@@ -16,6 +16,8 @@ const shoeImages = {
     'Adidas Continental 80 Sneaker': require('../../assets/images/adidas_continental.png'),
     'Nike Low Dunk Black and White': require('../../assets/images/Nike_low_dunk_black_and_white.png'),
     'Nike Low Dunk Medium Curry': require('../../assets/images/Nike_low_dunk_medium_curry.png'),
+    'Converse Chuck Taylor High Top Black': require('../../assets/images/Converse_Chuck_taylor_High_Top_Black.png'),
+    'Adidas Forum Low Talc Sesame' : require('../../assets/images/Adidas_Forum_Low_Talc_Sesame.png'),
     'Other Shoe Brand': require('../../assets/images/placeholderShoe.png'), // Default image
   };
   
