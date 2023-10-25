@@ -5,7 +5,6 @@ import { Camera } from 'expo-camera';
 import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
-//import { createModel } from "../models/DUMMYMODEL";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
@@ -13,6 +12,7 @@ import CameraNavigator from "../../CameraNavigator";
 import labels from '../model/labels.json';
 import CamResults from "./CamResults";
 import axios from 'axios';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 
 interface PhotoType {
@@ -64,12 +64,20 @@ const TakePhoto: React.FC = () => {
           exif: false
         };
         const picture = await cameraRef.current.takePictureAsync(options);
-        setPhoto(picture);
-
-        if (picture.base64) {
-          classifyPhoto(picture.base64);
+  
+        // Convert the captured image to JPEG
+        const jpegImg = await ImageManipulator.manipulateAsync(
+          picture.uri,
+          [],
+          { format: ImageManipulator.SaveFormat.JPEG, base64: true }
+        );
+  
+        setPhoto(jpegImg); // Store the JPEG image
+  
+        if (jpegImg.base64) {
+          classifyPhoto(jpegImg.base64);
         } else {
-          console.error("Fail on line 64");
+          console.error('Error converting image to JPEG');
         }
       }
     } catch (error) {
@@ -77,19 +85,18 @@ const TakePhoto: React.FC = () => {
     }
   };
 
-
   // Sends image data to cloud
   const classifyPhoto = async (base64Data: string) => {
     setisLoading(true);
-    try {      
-      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
+    try {     
+      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict-savePhoto' 
       const imageData = {
         image: base64Data,
       };
   
       console.log("Sending data")
       const response = await axios.post(url, imageData);
-      console.log(response.data);
+      //console.log(response.data);
       let array = response.data["prediction"]
   
       const flattenedPredictionValues = array[0] as unknown as number[];
@@ -97,7 +104,7 @@ const TakePhoto: React.FC = () => {
   
         // Get the highest value index
         const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
-        console.log('MaxIndex: ', largestIndex);
+        //console.log('MaxIndex: ', largestIndex);
         // Set the probability value
         setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(2) + '%');
   

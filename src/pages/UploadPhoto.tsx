@@ -49,19 +49,24 @@ const UploadPhoto: React.FC = () => {
       base64: true
       // with base64 we can skip some of the pre-processing later on
     });
-  
+
     // Pass selected image to ML function and view
     if (result.assets && result.assets.length > 0) {
       const imagePath = result.assets[0].uri;
-      setPickedImage(imagePath)
-
-      const base64Data = result.assets[0].base64;
+  
+      // Convert the image to JPEG
+      const jpegImg = await ImageManipulator.manipulateAsync(
+        imagePath,
+        [],
+        { format: ImageManipulator.SaveFormat.JPEG, base64: true }
+      );
+  
+      setPickedImage(jpegImg.uri);
       
-
-      if (base64Data) {
-        classifyPhoto(base64Data);
+      if (jpegImg.base64) {
+        classifyPhoto(jpegImg.base64);
       } else {
-        console.error('Error line 57');
+        console.error('Error converting image to JPEG');
       }
   }
   };
@@ -71,7 +76,7 @@ const UploadPhoto: React.FC = () => {
   const classifyPhoto = async (base64Data: string) => {
     setisLoading(true);
     try {      
-      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
+      let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict-savePhoto';
       const imageData = {
         image: base64Data,
       };
