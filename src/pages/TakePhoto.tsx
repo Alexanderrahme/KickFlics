@@ -143,11 +143,13 @@ const TakePhoto: React.FC = () => {
     return (
       <SafeAreaView style={styles.photo}>
         <Image style={styles.photo} source={{ uri: photo.uri }} />
+        {!isLoading && pickedImage !== '' && (
           <View>
               <TouchableOpacity style={styles.chooseButton} onPress={() => resultsButtonPress()}>
                 <Text style={styles.chooseButtonTxt}>See Results</Text>
               </TouchableOpacity>
           </View>
+                    )}
           <View style={styles.miniButtonContainer}>
         <Button title="Retry" onPress={() => setPhoto(undefined)} />
         {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
