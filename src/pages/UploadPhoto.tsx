@@ -53,7 +53,7 @@ const UploadPhoto: React.FC = () => {
     if (result.assets && result.assets.length > 0) {
       const imagePath = result.assets[0].uri;
       setPickedImage(imagePath)
-
+      setIsResult(false);
       const base64Data = result.assets[0].base64;
       const data = result.assets[0].base64;
       
@@ -114,7 +114,7 @@ const UploadPhoto: React.FC = () => {
     <SafeAreaView style={styles.container}>
         <View style={styles.firstView}>
           
-          {isResult && (
+          {isResult &&  (
             <View>
               <Text style={styles.matchFoundText}>Match Found!</Text>
             </View>
@@ -139,14 +139,15 @@ const UploadPhoto: React.FC = () => {
                 <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
             </TouchableOpacity>
 
-            {!isLoading && pickedImage !== '' &&(
+            {/* {!isLoading && pickedImage !== '' &&(
               <TouchableOpacity
                 style={styles.chooseButton}
                 //onPress={() => classifyPhoto(data)}
                 > 
                   <Text style={styles.chooseButtonTxt}>Begin Search</Text>
               </TouchableOpacity>
-            )}
+            )} */}
+
             {!isLoading && isResult && (
             <TouchableOpacity
               style={styles.chooseButton}
@@ -158,14 +159,7 @@ const UploadPhoto: React.FC = () => {
           </View>
       }
       
-      {isLoading && <LottieView
-        source={require('../../assets/animation_hand.json')}
-        autoPlay={true}
-        loop={true}
-        ref = {animationRef}
-        speed={1}
-        style={{width: 300, height: 300}}
-      />}  
+      {isLoading && <Text style={styles.loadingText}>Loading...</Text>}
   
 
     </View>
@@ -188,6 +182,12 @@ const styles = StyleSheet.create({
     textAlign: 'center', 
     marginTop: 20, 
     marginBottom: 20,
+  },
+  loadingText:{
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
   },
   buttonText: {
     color: 'white',

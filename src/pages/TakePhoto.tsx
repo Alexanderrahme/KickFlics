@@ -25,6 +25,7 @@ const TakePhoto: React.FC = () => {
   const [hasMediaLibraryPermissions, setHasMediaLibraryPermission] = useState<boolean | undefined>(undefined);
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
   const [type, setType] = useState(CameraType.back);
+  const [isLoading, setIsLoading] = useState(false);
 
   const nav = useNavigation();
   
@@ -72,6 +73,7 @@ const TakePhoto: React.FC = () => {
 
   // Sends image data to cloud
   const classifyPhoto = async (base64Data: string) => {
+    setIsLoading(true);
     try {      
       let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict';
       const imageData = {
@@ -93,7 +95,7 @@ const TakePhoto: React.FC = () => {
       // Find corresponding label
       const predictedLabel = labels[largestIndex];
       console.log("Predicted label: ",  predictedLabel);
-  
+      setIsLoading(false);
     } catch (err) {
       console.log(err);
     }
@@ -130,10 +132,16 @@ const TakePhoto: React.FC = () => {
 
   if (photo) {
     return (
-      <SafeAreaView style={styles.photo}>
-        <Image style={styles.photo} source={{ uri: photo.uri }} />
-        {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
-        {<Text>Prediction: </Text>}
+      <SafeAreaView style={styles.container}>
+        <Image 
+          style={styles.photo} 
+          source={photo} 
+        />
+        {hasMediaLibraryPermissions && <Button 
+          title="Save to camera roll" 
+          onPress={savePhoto} 
+        />}
+        {!isLoading && <Text>Loading...</Text>}
         <Button title="Retry" onPress={() => setPhoto(undefined)} />
       </SafeAreaView>
     );
@@ -163,17 +171,18 @@ const TakePhoto: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: '#fff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonContainer: {
     marginBottom: '10%',
     alignSelf: 'center',
   },
   photo: {
-    flex: 1,
-    alignItems: 'center',
-    marginBottom: '10%',
+    width: 350, 
+    height: 350, 
+    borderRadius: 5, 
   },
   topContainer:{
     backgroundColor: '#171717',

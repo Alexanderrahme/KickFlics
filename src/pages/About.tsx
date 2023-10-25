@@ -17,9 +17,9 @@ const About: FC = () => {
       <LottieView
          source={require('../../assets/animation_hand.json')}
          ref={animationRef}
-         //autoPlay={true}
-         //loop={true}
-         //speed={1}
+         autoPlay={true}
+         loop={true}
+         speed={1}
          style={styles.animation}
       />
     </SafeAreaView>
