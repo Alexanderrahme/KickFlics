@@ -121,7 +121,7 @@ const TakePhoto: React.FC = () => {
   const pickedImage = getPhotoUri(photo);
 
   const resultsButtonPress = () => {
-    nav.navigate("Your Flic", {shoe: shoe, prob: prob, pickedImage: pickedImage});
+    (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
 
   };
 
