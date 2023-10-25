@@ -11,7 +11,7 @@ import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import CameraNavigator from "../../CameraNavigator";
 import labels from '../model/labels.json';
-import Results from "./Results";
+import CamResults from "./CamResults";
 import axios from 'axios';
 
 
@@ -143,15 +143,15 @@ const TakePhoto: React.FC = () => {
     return (
       <SafeAreaView style={styles.photo}>
         <Image style={styles.photo} source={{ uri: photo.uri }} />
-        {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
-        <Image style={styles.photo} source={{ uri: photo.uri }} />
           <View>
               <TouchableOpacity style={styles.chooseButton} onPress={() => resultsButtonPress()}>
                 <Text style={styles.chooseButtonTxt}>See Results</Text>
               </TouchableOpacity>
           </View>
-          <Text>Prediction: </Text>
+          <View style={styles.miniButtonContainer}>
         <Button title="Retry" onPress={() => setPhoto(undefined)} />
+        {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
+        </View>
       </SafeAreaView>
     );
   }
@@ -178,9 +178,17 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginBottom: '10%',
+    marginTop: '10%',
     alignSelf: 'center',
   },
-
+  miniButtonContainer: {
+    marginBottom: '10%',
+    marginTop: '10%',
+    alignSelf: 'center',
+  },
+  button: {
+    marginTop: 20,
+  },
   chooseButton: {
     width: 350,
     height: 50,
