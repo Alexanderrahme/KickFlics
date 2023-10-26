@@ -201,11 +201,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  button: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-  },
+  // button: {
+  //   backgroundColor: '#4CAF50',
+  //   padding: 10,
+  //   borderRadius: 5,
+  // },
   imagePlaceholder:{
     width: 350, 
     height: 350, 

@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import labels from '../model/labels.json';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons'; 
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 
 interface PhotoType {
@@ -26,6 +27,7 @@ const TakePhoto: React.FC = () => {
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
   const [type, setType] = useState(CameraType.back);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResult, setIsResult] = useState(false);
 
   const nav = useNavigation();
   
@@ -96,6 +98,8 @@ const TakePhoto: React.FC = () => {
       const predictedLabel = labels[largestIndex];
       console.log("Predicted label: ",  predictedLabel);
       setIsLoading(false);
+      setIsResult(true);
+      
     } catch (err) {
       console.log(err);
     }
@@ -137,12 +141,18 @@ const TakePhoto: React.FC = () => {
           style={styles.photo} 
           source={photo} 
         />
-        {hasMediaLibraryPermissions && <Button 
-          title="Save to camera roll" 
-          onPress={savePhoto} 
-        />}
-        {!isLoading && <Text>Loading...</Text>}
-        <Button title="Retry" onPress={() => setPhoto(undefined)} />
+        {hasMediaLibraryPermissions && <TouchableOpacity
+          onPress={savePhoto}
+          style={styles.button} 
+        >
+          <Text style={styles.chooseButtonTxt}>Use this Photo</Text>
+        </TouchableOpacity>}
+        
+        <TouchableOpacity style={styles.button} onPress={() => setPhoto(undefined)}>
+          <Text style={styles.chooseButtonTxt}>Retry</Text>
+        </TouchableOpacity>
+
+        {!isLoading && <Text style={styles.loadingText}>Loading...</Text>}
       </SafeAreaView>
     );
   }
@@ -184,6 +194,19 @@ const styles = StyleSheet.create({
     height: 350, 
     borderRadius: 5, 
   },
+  loadingText:{
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
+  },
+  button: {
+    width: 350,
+    height: 50,
+    backgroundColor: '#004494',
+    marginTop: 20,
+    borderRadius: 15,
+  },
   topContainer:{
     backgroundColor: '#171717',
     width: '100%',
@@ -210,6 +233,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: "space-around",
+  },
+  chooseButtonTxt: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 15,
   },
 });
 
