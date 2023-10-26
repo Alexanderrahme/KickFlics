@@ -25,7 +25,6 @@ export default function App() {
         <Drawer.Screen name="About" component={About}/>
         <Drawer.Screen name="Take a Photo" component={TakePhoto}/>
         <Drawer.Screen name="Upload a Photo" component={ResultsNavigator} />
-        
       </Drawer.Navigator>
     </NavigationContainer>
   );
