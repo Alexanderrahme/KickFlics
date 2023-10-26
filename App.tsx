@@ -13,7 +13,6 @@ import ShopNavigator from './ShopNavigator';
 import ResultsNavigator from './ResultsNavigator';
 import CameraNavigator from './CameraNavigator';
 
-
 export default function App() {
   
   const Drawer = createDrawerNavigator();
@@ -22,6 +21,7 @@ export default function App() {
     <NavigationContainer>
       <Drawer.Navigator>
         <Drawer.Screen name="Home" component={Home}/>
+        <Drawer.Screen name="Shop" component={ShopNavigator}/>
         <Drawer.Screen name="Shop" component={ShopNavigator}/>
         <Drawer.Screen name="About" component={About}/>
         <Drawer.Screen name="Take a Photo" component={CameraNavigator}/>

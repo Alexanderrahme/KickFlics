@@ -4,7 +4,6 @@ import { StyleSheet, Text, View, Button, Image, Alert, Pressable} from 'react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Asset } from 'expo-asset';
 import * as tf from '@tensorflow/tfjs';
-import { decodeJpeg } from '@tensorflow/tfjs-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import labels from '../model/labels.json';
@@ -12,30 +11,43 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import {useNavigation} from "@react-navigation/native";
 import Results from "./Results";
 import ResultsNavigator from "../../ResultsNavigator";
-import * as ImageManipulator from 'expo-image-manipulator';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import {useNavigation} from "@react-navigation/native";
+import Results from "./Results";
+import ResultsNavigator from "../../ResultsNavigator";
+import axios from 'axios';
 import axios from 'axios';
 import LottieView from 'lottie-react-native';
 
 const UploadPhoto: React.FC = () => {
   const nav = useNavigation();
+  const animationRef = useRef<LottieView>(null);
 
   // Set up relevant variables
   const [TfReady, setTfReady] = useState(false);
   const [result, setResult] = useState('');
+  const [isResult, setIsResult] = useState(false);
   const [pickedImage, setPickedImage] = useState('');
   const [shoe, setShoe] = useState('');
-  const [isLoading, setisLoading] = useState(false);
+  const [shoe, setShoe] = useState('');
+  const [isLoading, setisisLoading] = useState(false);
+
+  useEffect(() => {
+    animationRef.current?.play();
+  }, []);
   const [prob, setProb] = useState('');
 
 
   // Initialise tensorflow
   useEffect(() => {
     const initTFLite = async () => {
+    const initTFLite = async () => {
       await tf.ready();
 
       setTfReady(true);
     };
 
+    initTFLite();
     initTFLite();
   }, []);
 
@@ -47,7 +59,6 @@ const UploadPhoto: React.FC = () => {
       aspect: [4, 3],
       quality: 1,
       base64: true
-      // with base64 we can skip some of the pre-processing later on
     });
 
     // Pass selected image to ML function and view
@@ -100,12 +111,20 @@ const UploadPhoto: React.FC = () => {
       console.log("Predicted label: ",  predictedLabel);
 
       setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
+      setIsResult(true);
       setShoe(predictedLabel);
       setisLoading(false);
   
     } catch (err) {
       console.log(err);
     }
+
+  };
+
+
+  const resultsButtonPress = () => {
+    (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
+
   };
 
 
@@ -117,6 +136,12 @@ const UploadPhoto: React.FC = () => {
     <SafeAreaView style={styles.container}>
         <View style={styles.firstView}>
           
+          {isResult &&  (
+            <View>
+              <Text style={styles.matchFoundText}>Match Found!</Text>
+            </View>
+          )}
+
           {pickedImage === '' && (
             <View style={styles.imagePlaceholder}/>
           )}
@@ -127,25 +152,36 @@ const UploadPhoto: React.FC = () => {
             />
           )}
 
-      {TfReady && !isLoading && 
-        <View>
-          <TouchableOpacity
-            style={styles.chooseButton}
-            onPress={selectImage}
-            > 
-              <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
-          </TouchableOpacity>
+         {TfReady && !isLoading && 
+          <View>
+            <TouchableOpacity
+              style={styles.chooseButton}
+              onPress={selectImage}
+              > 
+                <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
+            </TouchableOpacity>
 
-          {!isLoading && pickedImage !== '' && (
-          <TouchableOpacity
-            style={styles.chooseButton}
-            onPress={() => resultsButtonPress()}
-            > 
-              <Text style={styles.chooseButtonTxt}>See Results</Text>
-          </TouchableOpacity>
-          )}
-        </View>
+            {/* {!isLoading && pickedImage !== '' &&(
+              <TouchableOpacity
+                style={styles.chooseButton}
+                //onPress={() => classifyPhoto(data)}
+                > 
+                  <Text style={styles.chooseButtonTxt}>Begin Search</Text>
+              </TouchableOpacity>
+            )} */}
+
+            {!isLoading && isResult && (
+            <TouchableOpacity
+              style={styles.chooseButton}
+              onPress={() => resultsButtonPress()}
+              > 
+                <Text style={styles.chooseButtonTxt}>See Results</Text>
+            </TouchableOpacity>
+            )}
+          </View>
       }
+      
+      {isLoading && <Text style={styles.loadingText}>Loading...</Text>}
 
       {isLoading && <LottieView
         source={require('../../assets/animation_hand.json')}
@@ -169,6 +205,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  matchFoundText:{
+    fontSize: 20, 
+    fontWeight: 'bold', 
+    textAlign: 'center', 
+    marginTop: 20, 
+    marginBottom: 20,
+  },
+  loadingText:{
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 18
+  },
   buttonText: {
     color: 'white',
     textAlign: 'center',
@@ -181,6 +235,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // button: {
+  //   backgroundColor: '#4CAF50',
+  //   padding: 10,
+  //   borderRadius: 5,
+  // },
   button: {
     backgroundColor: '#4CAF50',
     padding: 10,

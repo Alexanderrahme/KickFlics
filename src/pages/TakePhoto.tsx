@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
-import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from "@react-navigation/native";
 import { Camera } from 'expo-camera';
-import { StyleSheet, Text, View, Button, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, Image, Alert, Pressable } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -18,6 +17,11 @@ import * as ImageManipulator from 'expo-image-manipulator';
 interface PhotoType {
   uri: string;
   base64?: string;
+}
+
+enum CameraType{
+  back = 'back',
+  front = 'front',
 }
 
 const TakePhoto: React.FC = () => {
@@ -37,6 +41,12 @@ const TakePhoto: React.FC = () => {
 
 
   
+  const [type, setType] = useState(CameraType.back);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isResult, setIsResult] = useState(false);
+
+  const nav = useNavigation();
+  
   useEffect(() => {
     (async () => {
       try {
@@ -53,7 +63,7 @@ const TakePhoto: React.FC = () => {
   }, []);
 
   if (hasCameraPermission === false) {
-    return <Text>Permission for camera not granted. Please change this in settings</Text>;
+    return <Text>Permission for camera not granted.</Text>;
   }
 
   const takePicture = async () => {
@@ -147,6 +157,9 @@ const TakePhoto: React.FC = () => {
     }
   };
 
+  const cancelButton = () => {
+    (nav.navigate as any)("Home");
+  }
 
   if (photo) {
     return (
@@ -179,29 +192,33 @@ const TakePhoto: React.FC = () => {
 
 
 
-return (
-  <Camera ref={cameraRef} style={styles.container}>
-      <TouchableOpacity 
-          style={[styles.chooseButton, { marginBottom: 50 }]} 
-          onPress={takePicture}
-      >
-          <Text style={styles.chooseButtonTxt}>Take Picture</Text>
-      </TouchableOpacity>
-      <StatusBar style='auto' />
-  </Camera>
-);
+  return (
+    <Camera ref={cameraRef} style={styles.container} type={type}>
+        <View style={styles.topContainer}>
 
-
-
-
-};
-
+        </View>
+        <View style={styles.bottomContainer}>
+          <Pressable onPress={cancelButton}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </Pressable>
+          <Pressable 
+            style={styles.takePictureButton}
+            onPress={takePicture} 
+          />
+          <Pressable onPress={switchCamera}>
+            <Ionicons name="camera-reverse-outline" size={24} color="white" />
+        </Pressable>
+        </View>
+    </Camera>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: '#fff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonContainer: {
     marginBottom: '10%',
@@ -231,10 +248,57 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
     photo: {
-    flex: 1,
-    alignItems: 'center',
-    marginBottom: '10%',
+    width: 350, 
+    height: 350, 
+    borderRadius: 5, 
   },
+  loadingText:{
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
+  },
+  button: {
+    width: 350,
+    height: 50,
+    backgroundColor: '#004494',
+    marginTop: 20,
+    borderRadius: 15,
+  },
+  topContainer:{
+    backgroundColor: '#171717',
+    width: '100%',
+    height: '15%',
+    marginBottom: 450,
+  },
+  takePictureButton: {
+    backgroundColor: 'white',
+    marginBottom: '15%',
+    // alignSelf: 'center',
+    height: 70,
+    width: 70, 
+    borderRadius: 50,
+    marginTop: 50, 
+  },
+  cancelText:{
+    color: 'white',
+    fontSize: 16,
+  },
+  bottomContainer:{
+    backgroundColor: '#171717',
+    width: '100%',
+    height: '25%',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: "space-around",
+  },
+  chooseButtonTxt: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 15,
+  },,
   
 });
 
