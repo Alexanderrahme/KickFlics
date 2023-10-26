@@ -31,6 +31,7 @@ const TakePhoto: React.FC = () => {
   const [shoe, setShoe] = useState('');
   const nav = useNavigation();
   const [TfReady, setTfReady] = useState(false);
+  const [tempShoe, setTempShoe] = useState('');
 
 
 
@@ -75,7 +76,8 @@ const TakePhoto: React.FC = () => {
         setPhoto(jpegImg); // Store the JPEG image
   
         if (jpegImg.base64) {
-          classifyPhoto(jpegImg.base64);
+          //classifyPhoto(jpegImg.base64);
+          setTempShoe(jpegImg.base64 || "");
         } else {
           console.error('Error converting image to JPEG');
         }
@@ -86,12 +88,12 @@ const TakePhoto: React.FC = () => {
   };
 
   // Sends image data to cloud
-  const classifyPhoto = async (base64Data: string) => {
+  const classifyPhoto = async () => {
     setisLoading(true);
     try {     
       let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict-savePhoto' 
       const imageData = {
-        image: base64Data,
+        image: tempShoe,
       };
   
       console.log("Sending data")
@@ -148,32 +150,48 @@ const TakePhoto: React.FC = () => {
 
   if (photo) {
     return (
-      <SafeAreaView style={styles.photo}>
-        <Image style={styles.photo} source={{ uri: photo.uri }} />
-        {!isLoading && pickedImage !== '' && (
-          <View>
-              <TouchableOpacity style={styles.chooseButton} onPress={() => resultsButtonPress()}>
-                <Text style={styles.chooseButtonTxt}>See Results</Text>
-              </TouchableOpacity>
-          </View>
-                    )}
-          <View style={styles.miniButtonContainer}>
-        <Button title="Retry" onPress={() => setPhoto(undefined)} />
-        {hasMediaLibraryPermissions && <Button title="Save to camera roll" onPress={savePhoto} />}
-        </View>
-      </SafeAreaView>
+        <SafeAreaView style={styles.photo}>
+            <Image style={styles.photo} source={{ uri: photo.uri }} />
+
+            <TouchableOpacity style={styles.chooseButton} onPress={classifyPhoto}>
+                <Text style={styles.chooseButtonTxt}>Classify Photo</Text>
+            </TouchableOpacity>
+
+            {!isLoading && pickedImage !== '' && (
+                <TouchableOpacity style={styles.chooseButton} onPress={() => resultsButtonPress()}>
+                    <Text style={styles.chooseButtonTxt}>See Results</Text>
+                </TouchableOpacity>
+            )}
+            
+            <TouchableOpacity style={styles.chooseButton} onPress={() => setPhoto(undefined)}>
+                <Text style={styles.chooseButtonTxt}>Retry</Text>
+            </TouchableOpacity>
+            
+            {hasMediaLibraryPermissions && 
+                <TouchableOpacity style={styles.chooseButton} onPress={savePhoto}>
+                    <Text style={styles.chooseButtonTxt}>Save to camera roll</Text>
+                </TouchableOpacity>
+            }
+
+        </SafeAreaView>
     );
-  }
+}
 
 
-  return (
-    <Camera ref={cameraRef} style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Button title="Take Picture" onPress={takePicture} />
-      </View>
+
+return (
+  <Camera ref={cameraRef} style={styles.container}>
+      <TouchableOpacity 
+          style={[styles.chooseButton, { marginBottom: 50 }]} 
+          onPress={takePicture}
+      >
+          <Text style={styles.chooseButtonTxt}>Take Picture</Text>
+      </TouchableOpacity>
       <StatusBar style='auto' />
-    </Camera>
-  );
+  </Camera>
+);
+
+
 
 
 };
@@ -216,7 +234,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginBottom: '10%',
-  }
+  },
+  
 });
 
 export default TakePhoto;
