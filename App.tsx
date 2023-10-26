@@ -11,7 +11,7 @@ import TakePhoto from './src/pages/TakePhoto';
 import UploadPhoto from './src/pages/UploadPhoto';
 import ShopNavigator from './ShopNavigator';
 import ResultsNavigator from './ResultsNavigator';
-
+import CameraNavigator from './CameraNavigator';
 
 export default function App() {
   
@@ -23,7 +23,7 @@ export default function App() {
         <Drawer.Screen name="Home" component={Home}/>
         <Drawer.Screen name="Shop" component={ShopNavigator}/>
         <Drawer.Screen name="About" component={About}/>
-        <Drawer.Screen name="Take a Photo" component={TakePhoto}/>
+        <Drawer.Screen name="Take a Photo" component={CameraNavigator}/>
         <Drawer.Screen name="Upload a Photo" component={ResultsNavigator} />
         
       </Drawer.Navigator>

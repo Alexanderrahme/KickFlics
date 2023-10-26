@@ -8,8 +8,8 @@ import ShopNavigator from "../../ShopNavigator";
 const Shop: React.FC = () => {
   const nav = useNavigation();
   
-  const handleCardPress = (shoe: Shoe) => {
-    nav.navigate("ShoeInfo", {shoe});
+  const handleCardPress = (shoe: any) => {
+    (nav.navigate as any)("ShoeInfo", {shoe});
   };
 
   return (
