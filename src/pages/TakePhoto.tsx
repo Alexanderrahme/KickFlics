@@ -29,22 +29,18 @@ const TakePhoto: React.FC = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
   const [hasMediaLibraryPermissions, setHasMediaLibraryPermission] = useState<boolean | undefined>(undefined);
   const [photo, setPhoto] = useState<PhotoType | undefined>(undefined);
-  const [isLoading, setisLoading] = useState(false);
   const [result, setResult] = useState('');
   const [prob, setProb] = useState('');
   const [shoe, setShoe] = useState('');
-  const nav = useNavigation();
   const [TfReady, setTfReady] = useState(false);
   const [tempShoe, setTempShoe] = useState('');
 
-
-
-
-  
   const [type, setType] = useState(CameraType.back);
-  const [isLoading, setIsLoading] = useState(false);
   const [isResult, setIsResult] = useState(false);
+  const [showLoadingText, setShowLoadingText] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [showClassifyButton, setShowClassifyButton] = useState(true);
   const nav = useNavigation();
   
   useEffect(() => {
@@ -67,6 +63,8 @@ const TakePhoto: React.FC = () => {
   }
 
   const takePicture = async () => {
+    setIsLoading(true);
+    setShowClassifyButton(true);
     try {
       if (cameraRef.current) {
         const options = {
@@ -99,7 +97,8 @@ const TakePhoto: React.FC = () => {
 
   // Sends image data to cloud
   const classifyPhoto = async () => {
-    setisLoading(true);
+    setShowClassifyButton(false); 
+    setShowLoadingText(true);
     try {     
       let url = 'https://australia-southeast1-global-bridge-402207.cloudfunctions.net/api_predict-savePhoto' 
       const imageData = {
@@ -114,11 +113,10 @@ const TakePhoto: React.FC = () => {
       const flattenedPredictionValues = array[0] as unknown as number[];
       console.log("Flattened Prediction Values: ", flattenedPredictionValues);
   
-        // Get the highest value index
-        const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
-        //console.log('MaxIndex: ', largestIndex);
-        // Set the probability value
-        setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(2) + '%');
+      // Get the highest value index
+      const largestIndex = flattenedPredictionValues.indexOf(Math.max(...flattenedPredictionValues));
+      // Set the probability value
+      setProb((flattenedPredictionValues[largestIndex] * 100).toFixed(2) + '%');
   
       // Find corresponding label
       const predictedLabel = labels[largestIndex];
@@ -126,7 +124,9 @@ const TakePhoto: React.FC = () => {
   
       setResult(`Predicted category: ${[predictedLabel]} with probability: ${flattenedPredictionValues[largestIndex]}`);
       setShoe(predictedLabel);
-      setisLoading(false);
+      setIsLoading(false);
+      setShowLoadingText(false)
+
   
     } catch (err) {
       console.log(err);
@@ -141,14 +141,17 @@ const TakePhoto: React.FC = () => {
 
   const resultsButtonPress = () => {
     (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
-
   };
+
+  const alertSaved = async () => {
+    Alert.alert("Notice", "Photo has been saved, take another picture");
+    savePhoto();
+  }
 
   const savePhoto = async () => {
     if (photo?.uri) {
       try {
         await MediaLibrary.saveToLibraryAsync(photo.uri);
-        Alert.alert("Alert", "Scanning yo shoes.");
         setPhoto(undefined);
       } catch (error) {
         console.error("Error saving photo", error);
@@ -161,34 +164,47 @@ const TakePhoto: React.FC = () => {
     (nav.navigate as any)("Home");
   }
 
+  const switchCamera = () => {
+    setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+    console.log(type);
+  };
+
   if (photo) {
     return (
-        <SafeAreaView style={styles.photo}>
-            <Image style={styles.photo} source={{ uri: photo.uri }} />
+      <SafeAreaView style={styles.container}>
+        <Image style={styles.photo} source={{ uri: photo.uri }} />
+  
+        <View style={styles.buttonContainer}>
+          {showClassifyButton && (
+              <TouchableOpacity style={styles.chooseButton} onPress={classifyPhoto}>
+                  <Text style={styles.chooseButtonTxt}>Classify Photo</Text>
+              </TouchableOpacity>
+          )}
 
-            <TouchableOpacity style={styles.chooseButton} onPress={classifyPhoto}>
-                <Text style={styles.chooseButtonTxt}>Classify Photo</Text>
-            </TouchableOpacity>
-
-            {!isLoading && pickedImage !== '' && (
-                <TouchableOpacity style={styles.chooseButton} onPress={() => resultsButtonPress()}>
-                    <Text style={styles.chooseButtonTxt}>See Results</Text>
-                </TouchableOpacity>
-            )}
+          {showLoadingText && (
+            <Text style={styles.loadingText}>Loading...</Text>
+          )}
+  
+          {!isLoading && pickedImage !== '' && (
+              <TouchableOpacity style={styles.chooseButton} onPress={() => resultsButtonPress()}>
+                  <Text style={styles.chooseButtonTxt}>See Results</Text>
+              </TouchableOpacity>
+          )}
             
-            <TouchableOpacity style={styles.chooseButton} onPress={() => setPhoto(undefined)}>
-                <Text style={styles.chooseButtonTxt}>Retry</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.chooseButton} onPress={() => setPhoto(undefined)}>
+              <Text style={styles.chooseButtonTxt}>Retry</Text>
+          </TouchableOpacity>
             
-            {hasMediaLibraryPermissions && 
-                <TouchableOpacity style={styles.chooseButton} onPress={savePhoto}>
-                    <Text style={styles.chooseButtonTxt}>Save to camera roll</Text>
-                </TouchableOpacity>
-            }
-
-        </SafeAreaView>
+          {hasMediaLibraryPermissions && 
+              <TouchableOpacity style={styles.chooseButton} onPress={alertSaved}>
+                  <Text style={styles.chooseButtonTxt}>Save to camera roll</Text>
+              </TouchableOpacity>
+          }
+        </View>
+      </SafeAreaView>
     );
-}
+  }
+  
 
 
 
@@ -206,7 +222,7 @@ const TakePhoto: React.FC = () => {
             onPress={takePicture} 
           />
           <Pressable onPress={switchCamera}>
-            <Ionicons name="camera-reverse-outline" size={24} color="white" />
+            {/* <Ionicons name="camera-reverse-outline" size={24} color="white" /> */}
         </Pressable>
         </View>
     </Camera>
@@ -216,14 +232,18 @@ const TakePhoto: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  photo: {
+    flex: 1,
+    aspectRatio: 1,
+    resizeMode: 'contain',
+    
   },
   buttonContainer: {
-    marginBottom: '10%',
-    marginTop: '10%',
-    alignSelf: 'center',
+    alignItems: 'center',
+    marginBottom: 60,
   },
   miniButtonContainer: {
     marginBottom: '10%',
@@ -233,11 +253,17 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
   },
+  loadingText:{
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
+  },
   chooseButton: {
     width: 350,
     height: 50,
     backgroundColor: '#004494',
-    marginTop: 20,
+    marginTop: 40,
     borderRadius: 15,
   },
   chooseButtonTxt: {
@@ -251,20 +277,9 @@ const styles = StyleSheet.create({
     width: 350, 
     height: 350, 
     borderRadius: 5, 
+    marginLeft: 30,
   },
-  loadingText:{
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 40,
-  },
-  button: {
-    width: 350,
-    height: 50,
-    backgroundColor: '#004494',
-    marginTop: 20,
-    borderRadius: 15,
-  },
+
   topContainer:{
     backgroundColor: '#171717',
     width: '100%',
@@ -292,14 +307,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: "space-around",
   },
-  chooseButtonTxt: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    marginTop: 15,
-  },,
-  
 });
 
 export default TakePhoto;

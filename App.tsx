@@ -22,7 +22,6 @@ export default function App() {
       <Drawer.Navigator>
         <Drawer.Screen name="Home" component={Home}/>
         <Drawer.Screen name="Shop" component={ShopNavigator}/>
-        <Drawer.Screen name="Shop" component={ShopNavigator}/>
         <Drawer.Screen name="About" component={About}/>
         <Drawer.Screen name="Take a Photo" component={CameraNavigator}/>
         <Drawer.Screen name="Upload a Photo" component={ResultsNavigator} />

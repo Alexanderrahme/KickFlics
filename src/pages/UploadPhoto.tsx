@@ -11,13 +11,9 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import {useNavigation} from "@react-navigation/native";
 import Results from "./Results";
 import ResultsNavigator from "../../ResultsNavigator";
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import {useNavigation} from "@react-navigation/native";
-import Results from "./Results";
-import ResultsNavigator from "../../ResultsNavigator";
-import axios from 'axios';
 import axios from 'axios';
 import LottieView from 'lottie-react-native';
+import * as ImageManipulator from 'expo-image-manipulator'; // SEE IF THIS CHANGES ANYTHING
 
 const UploadPhoto: React.FC = () => {
   const nav = useNavigation();
@@ -29,8 +25,7 @@ const UploadPhoto: React.FC = () => {
   const [isResult, setIsResult] = useState(false);
   const [pickedImage, setPickedImage] = useState('');
   const [shoe, setShoe] = useState('');
-  const [shoe, setShoe] = useState('');
-  const [isLoading, setisisLoading] = useState(false);
+  const [isLoading, setisLoading] = useState(false);
 
   useEffect(() => {
     animationRef.current?.play();
@@ -41,13 +36,11 @@ const UploadPhoto: React.FC = () => {
   // Initialise tensorflow
   useEffect(() => {
     const initTFLite = async () => {
-    const initTFLite = async () => {
       await tf.ready();
 
       setTfReady(true);
     };
 
-    initTFLite();
     initTFLite();
   }, []);
 
@@ -94,7 +87,7 @@ const UploadPhoto: React.FC = () => {
   
       console.log("Sending data")
       const response = await axios.post(url, imageData);
-      console.log(response.data);
+      //console.log(response.data);
       let array = response.data["prediction"]
 
       const flattenedPredictionValues = array[0] as unknown as number[];
@@ -121,13 +114,6 @@ const UploadPhoto: React.FC = () => {
 
   };
 
-
-  const resultsButtonPress = () => {
-    (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
-
-  };
-
-
   const resultsButtonPress = () => {
     (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
   };
@@ -136,15 +122,6 @@ const UploadPhoto: React.FC = () => {
     <SafeAreaView style={styles.container}>
         <View style={styles.firstView}>
           
-          {isResult &&  (
-            <View>
-              <Text style={styles.matchFoundText}>Match Found!</Text>
-            </View>
-          )}
-
-          {pickedImage === '' && (
-            <View style={styles.imagePlaceholder}/>
-          )}
           {pickedImage !== '' && (
             <Image
               source={{ uri: pickedImage }}
@@ -160,15 +137,6 @@ const UploadPhoto: React.FC = () => {
               > 
                 <Text style={styles.chooseButtonTxt}>Pick an Image</Text>
             </TouchableOpacity>
-
-            {/* {!isLoading && pickedImage !== '' &&(
-              <TouchableOpacity
-                style={styles.chooseButton}
-                //onPress={() => classifyPhoto(data)}
-                > 
-                  <Text style={styles.chooseButtonTxt}>Begin Search</Text>
-              </TouchableOpacity>
-            )} */}
 
             {!isLoading && isResult && (
             <TouchableOpacity
@@ -187,7 +155,7 @@ const UploadPhoto: React.FC = () => {
         source={require('../../assets/animation_hand.json')}
         autoPlay
         loop
-        style={{ paddingTop: 25, width: 300, height: 300, backgroundColor: 'black'}}
+        style={{ paddingTop: 25, width: 300, height: 300}}
       />}  
   
 
@@ -223,11 +191,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18
   },
-  buttonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 18
-  },
   firstView:{
     height: '100%',
     display: 'flex',
@@ -249,7 +212,7 @@ const styles = StyleSheet.create({
     width: 350, 
     height: 350, 
     borderRadius: 5, 
-    backgroundColor: '#eee',
+    //backgroundColor: '#eee',
   },
   image:{ 
     width: 350, 
