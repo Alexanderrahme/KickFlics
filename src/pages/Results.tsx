@@ -35,6 +35,18 @@ const shoeImages = {
           const apiKey: string = 'AIzaSyCncv7v2o2S-8nNLEwiVs28pTBTYVdxE5g'; 
           const cx: string = 'a259cb0bd727843c2'; 
           const query = encodeURIComponent(`${shoe} sneakers`);
+
+          const shoePrices = {
+            'Air Jordan 1': [170, 160, 168, 180],
+            'Converse Distrito 2.0 Canvas Low Sneaker': [90, 76, 90, 70],
+            'Adidas Continental 80 Sneaker': [95, 128, 95, 98], 
+            'Nike Low Dunk Black and White': [103, 123, 100, 103],
+            'Nike Low Dunk Medium Curry': [184, 161, 172, 164],
+            'Converse Chuck Taylor High Top Black': [103, 122, 103, 100], 
+            'Adidas Forum Low Talc Sesame': [151, 200, 174, 174],
+        };
+
+          const prices = shoePrices[shoe as keyof typeof shoePrices] || [100, 120, 85, 122];
   
           const apiUrl: string = `https://www.googleapis.com/customsearch/v1?q=${query}&cx=${cx}&key=${apiKey}`;
           
@@ -49,6 +61,7 @@ const shoeImages = {
                   const updatedResultsData = firstFourResults.map((item, index) => ({
                       id: index + 1,
                       image: item.image?.thumbnailLink || '',
+                      price: prices[index],
                       link: item.link, // Use the link as text, you can customize this property as needed
                       
                   }));
@@ -65,34 +78,43 @@ const shoeImages = {
       const handleMatchPress = (shoe, image, link) => {
           nav.navigate("Match Details", { shoe, image, link: link });
       }
+
     return (
-      <View style={styles.container}>
-              <Image
-                  source={{ uri: pickedImage }}
-                  style={styles.circularImage}
-              />
-              <View style = {styles.headerContainer}>
-                  <Text style={styles.headerText}>Potential Matches</Text>
-              </View>
-              <ScrollView style={styles.scrollView}>
-              {resultsData.map((box) => (
-                      <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.image, box.link )}>
-                          <Image
-                              source={shoeImages[shoe] || shoeImages['Other Shoe Brand']}
-                              style={styles.boxImage}
-                          />
-                          <View style={styles.boxTextContainer}>
-                              <Text style={styles.shoeNameText}>{shoe}</Text>
-                              <Text style={styles.probabilityText}>{prob}</Text>
-                              <Text style={styles.priceText}>$119 AUD</Text>
-                              <TouchableOpacity onPress={() => handleLinkPress(box.link)}>
-                                  <Text style={styles.link}>Link</Text>
-                              </TouchableOpacity>
-                          </View>
-                      </TouchableOpacity>
-                  ))}
-              </ScrollView>
+        <View style={styles.container}>
+          <Image
+            source={{ uri: pickedImage }}
+            style={styles.circularImage}
+          />
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>Potential Matches</Text>
           </View>
+          <ScrollView style={styles.scrollView}>
+            {resultsData.map((box) => {
+              // Truncate link to retrieve domain name 
+              const parts = box.link.match(/:\/\/(www\.)?(.[^/]+)/);
+              let siteName = parts && parts[2] ? parts[2].replace('.com', '') : '';
+              siteName = siteName.charAt(0).toUpperCase() + siteName.slice(1);
+              console.log(siteName);
+      
+              return (
+                <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.image, box.link)}>
+                  <Image
+                    source={shoeImages[shoe] || shoeImages['Other Shoe Brand']}
+                    style={styles.boxImage}
+                  />
+                  <View style={styles.boxTextContainer}>
+                    <Text style={styles.shoeNameText}>{shoe}</Text>
+                    <Text style={styles.probabilityText}>{prob}</Text>
+                    <Text style={styles.priceText}>${box.price}  AUD</Text>
+                    <TouchableOpacity onPress={() => handleLinkPress(box.link)}>
+                      <Text style={styles.link}>{siteName}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
       );
     
   };
