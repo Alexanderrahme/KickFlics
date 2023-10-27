@@ -42,11 +42,11 @@ const shoeImages = {
             'Adidas Continental 80 Sneaker': [95, 128, 95, 98], 
             'Nike Low Dunk Black and White': [103, 123, 100, 103],
             'Nike Low Dunk Medium Curry': [184, 161, 172, 164],
-            'Converse Chuck Taylor High Top Black': [103, 122, 100, 100], 
+            'Converse Chuck Taylor High Top Black': [103, 122, 103, 100], 
             'Adidas Forum Low Talc Sesame': [151, 200, 174, 174],
         };
   
-        const prices = shoePrices[shoe as keyof typeof shoePrices] || [99.99, 119.99, 79.99, 129.99];
+        const prices = shoePrices[shoe as keyof typeof shoePrices] || [100, 120, 85, 122];
   
           const apiUrl: string = `https://www.googleapis.com/customsearch/v1?q=${query}&cx=${cx}&key=${apiKey}`;
           
@@ -71,6 +71,9 @@ const shoeImages = {
           });
         }, [shoe]);
   
+
+    
+
       const handleLinkPress = (url) => {
           Linking.openURL(url);
           
@@ -78,34 +81,43 @@ const shoeImages = {
       const handleMatchPress = (shoe, image, link) => {
           nav.navigate("Match Details", { shoe, image, link: link });
       }
-    return (
-      <View style={styles.container}>
-              <Image
-                  source={{ uri: pickedImage }}
-                  style={styles.circularImage}
-              />
-              <View style = {styles.headerContainer}>
-                  <Text style={styles.headerText}>Potential Matches</Text>
-              </View>
-              <ScrollView style={styles.scrollView}>
-              {resultsData.map((box) => (
-                      <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.price,box.image, box.link )}>
-                          <Image
-                              source={shoeImages[shoe] || shoeImages['Other Shoe Brand']}
-                              style={styles.boxImage}
-                          />
-                          <View style={styles.boxTextContainer}>
-                              <Text style={styles.shoeNameText}>{shoe}</Text>
-                              <Text style={styles.probabilityText}>{prob}</Text>
-                              <Text style={styles.priceText}>${box.price}  AUD</Text>
-                              <TouchableOpacity onPress={() => handleLinkPress(box.link)}>
-                                  <Text style={styles.link}>Link</Text>
-                              </TouchableOpacity>
-                          </View>
-                      </TouchableOpacity>
-                  ))}
-              </ScrollView>
+
+      return (
+        <View style={styles.container}>
+          <Image
+            source={{ uri: pickedImage }}
+            style={styles.circularImage}
+          />
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>Potential Matches</Text>
           </View>
+          <ScrollView style={styles.scrollView}>
+            {resultsData.map((box) => {
+              // Truncate link to retrieve domain name 
+              const parts = box.link.split('.'); 
+              let siteName = parts[1]; 
+              siteName = siteName.charAt(0).toUpperCase() + siteName.slice(1);
+              console.log(siteName);
+      
+              return (
+                <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.price, box.image, box.link)}>
+                  <Image
+                    source={shoeImages[shoe] || shoeImages['Other Shoe Brand']}
+                    style={styles.boxImage}
+                  />
+                  <View style={styles.boxTextContainer}>
+                    <Text style={styles.shoeNameText}>{shoe}</Text>
+                    <Text style={styles.probabilityText}>{prob}</Text>
+                    <Text style={styles.priceText}>${box.price}  AUD</Text>
+                    <TouchableOpacity onPress={() => handleLinkPress(box.link)}>
+                      <Text style={styles.link}>{siteName}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
       );
     
   };
