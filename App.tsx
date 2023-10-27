@@ -13,7 +13,6 @@ import ShopNavigator from './ShopNavigator';
 import ResultsNavigator from './ResultsNavigator';
 import CameraNavigator from './CameraNavigator';
 
-
 export default function App() {
   
   const Drawer = createDrawerNavigator();

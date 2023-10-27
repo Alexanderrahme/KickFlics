@@ -11,7 +11,6 @@ import CameraNavigator from '../../CameraNavigator';
 // Define a map of shoes to image sources
 const shoeImages = {
     'Air Jordan 1': require('../../assets/images/Air_Jordan_1s.png'),
-    'Under Armour Ripple 2.0 Sneaker': require('../../assets/images/Under_Armour_Ripple.png'),
     'Converse Distrito 2.0 Canvas Low Sneaker': require('../../assets/images/Converse_Distrito_2.0.png'),
     'Adidas Continental 80 Sneaker': require('../../assets/images/adidas_continental.png'),
     'Nike Low Dunk Black and White': require('../../assets/images/Nike_low_dunk_black_and_white.png'),
@@ -20,7 +19,7 @@ const shoeImages = {
     'Adidas Forum Low Talc Sesame' : require('../../assets/images/Adidas_Forum_Low_Talc_Sesame.png'),
     'Other Shoe Brand': require('../../assets/images/placeholderShoe.png'), // Default image
   };
-  
+
   
   const CamResults = () => {
       const nav = useNavigation();
@@ -31,11 +30,24 @@ const shoeImages = {
       const [googleSearchLinks, setGoogleSearchLinks] = useState(['', '', '', '']);
       const [resultsData, setResultsData] = useState([]);
   
+      
       useEffect(() => {
           const apiKey: string = 'AIzaSyCncv7v2o2S-8nNLEwiVs28pTBTYVdxE5g'; 
           const cx: string = 'a259cb0bd727843c2'; 
           const query = encodeURIComponent(`${shoe} sneakers`);
-  
+
+          const shoePrices = {
+            'Air Jordan 1': [170, 160, 168, 180],
+            'Converse Distrito 2.0 Canvas Low Sneaker': [90, 76, 90, 70],
+            'Adidas Continental 80 Sneaker': [95, 128, 95, 98], 
+            'Nike Low Dunk Black and White': [103, 123, 100, 103],
+            'Nike Low Dunk Medium Curry': [184, 161, 172, 164],
+            'Converse Chuck Taylor High Top Black': [103, 122, 100, 100], 
+            'Adidas Forum Low Talc Sesame': [151, 200, 174, 174],
+        };
+
+        const prices = shoePrices[shoe as keyof typeof shoePrices] || [100, 120, 85, 122];
+
           const apiUrl: string = `https://www.googleapis.com/customsearch/v1?q=${query}&cx=${cx}&key=${apiKey}`;
           
           axios.get(apiUrl).then((response) => {
@@ -76,7 +88,7 @@ const shoeImages = {
               </View>
               <ScrollView style={styles.scrollView}>
               {resultsData.map((box) => (
-                      <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.image, box.link )}>
+                      <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.price, box.image, box.link )}>
                           <Image
                               source={shoeImages[shoe] || shoeImages['Other Shoe Brand']}
                               style={styles.boxImage}
@@ -84,7 +96,7 @@ const shoeImages = {
                           <View style={styles.boxTextContainer}>
                               <Text style={styles.shoeNameText}>{shoe}</Text>
                               <Text style={styles.probabilityText}>{prob}</Text>
-                              <Text style={styles.priceText}>$119 AUD</Text>
+                              <Text style={styles.priceText}>${box.price} AUD</Text>
                               <TouchableOpacity onPress={() => handleLinkPress(box.link)}>
                                   <Text style={styles.link}>Link</Text>
                               </TouchableOpacity>
