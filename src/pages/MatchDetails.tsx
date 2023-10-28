@@ -10,16 +10,34 @@ import ResultsNavigator from '../../ResultsNavigator';
 const MatchDetails = () => {
     const nav = useNavigation();
     const route = useRoute();
-    const { shoe, image, link } = route.params;
     const [googleSearchLink, setGoogleSearchLink] = useState('');
+    const image = route.params?.image || "";
+    const price = route.params?.price || "";
+    const shoe = route.params?.shoe || "";
+    const link = route.params?.link || "";
+  
+    const shoeImages = {
+        'Air Jordan 1': require('../../assets/images/Air_Jordan_1s.png'),
+        'Under Armour Ripple 2.0 Sneaker': require('../../assets/images/Under_Armour_Ripple.png'),
+        'Converse Distrito 2.0 Canvas Low Sneaker': require('../../assets/images/Converse_Distrito_2.0.png'),
+        'Adidas Continental 80 Sneaker': require('../../assets/images/adidas_continental.png'),
+        'Nike Low Dunk Black and White': require('../../assets/images/Nike_low_dunk_black_and_white.png'),
+        'Nike Low Dunk Medium Curry': require('../../assets/images/Nike_low_dunk_medium_curry.png'),
+        'Converse Chuck Taylor High Top Black': require('../../assets/images/Converse_Chuck_taylor_High_Top_Black.png'),
+        'Adidas Forum Low Talc Sesame' : require('../../assets/images/Adidas_Forum_Low_Talc_Sesame.png'),
+        'Other Shoe Brand': require('../../assets/images/placeholderShoe.png'), // Default image
+      };
 
-    
     return (
         <View style={styles.container}>
-            <Image source={require('../../assets/images/placeholderShoe.png') as any} style={styles.image} />
-            <View style={styles.textContainer}>
+            <View style={styles.imageContainer}>
+                <Image source={shoeImages[shoe]} style={styles.image} />
+            </View>
+            <View style={styles.nameContainer}>
                 <Text style={styles.name}>{shoe}</Text>
-                <Text style={styles.price}>Price: $119 AUD</Text>
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.price}>Price: ${price} AUD</Text>
                 <TouchableOpacity onPress={() => Linking.openURL(link)}>
                     {link ? <Text style={styles.link}>{link}</Text> : null}
                 </TouchableOpacity>
@@ -36,19 +54,37 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         padding: 20,
     },
+    imageContainer: {
+        width: 350,
+        height: 250,
+        borderColor: 'black', // Set the border color to black
+        borderWidth: 2, // Set the border width
+        borderRadius: 20, // Add border radius for curved corners
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden', 
+        marginBottom: 10,
+    },
     image: {
-        width: '100%',
-        height: '20%',
+        width: '85%',
+        height: '85%',
         resizeMode: 'cover',
     },
     textContainer: {
         flex: 1,
         alignItems: 'flex-start',
     },
+    nameContainer: {
+        width: 350,
+        backgroundColor: 'black',
+        padding: 10,
+        borderRadius: 5, 
+        alignItems: 'center',      
+    },
     name: {
         fontSize: 20,
         fontWeight: 'bold',
-        textDecorationLine: 'underline',
+        color: 'white', 
         marginVertical: 10,
         textAlign: 'left',
     },

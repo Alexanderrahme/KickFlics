@@ -75,8 +75,8 @@ const shoeImages = {
           Linking.openURL(url);
           
       }
-      const handleMatchPress = (shoe, image, link) => {
-          nav.navigate("Match Details", { shoe, image, link: link });
+      const handleMatchPress = (shoe, price, image, link) => {
+          nav.navigate("Match Details", { shoe: shoe, price: price, image: image, link: link });
       }
 
     return (
@@ -97,7 +97,7 @@ const shoeImages = {
               console.log(siteName);
       
               return (
-                <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.image, box.link)}>
+                <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.price, box.image, box.link)}>
                   <Image
                     source={shoeImages[shoe] || shoeImages['Other Shoe Brand']}
                     style={styles.boxImage}
