@@ -37,13 +37,12 @@ const shoeImages = {
           const query = encodeURIComponent(`buy ${shoe} sneakers australia`);
 
           const shoePrices = {
-            'Air Jordan 1': [170, 160, 168, 180],
-            'Converse Distrito 2.0 Canvas Low Sneaker': [90, 76, 90, 70],
-            'Adidas Continental 80 Sneaker': [95, 128, 95, 98], 
-            'Nike Low Dunk Black and White': [103, 123, 100, 103],
+            'Converse Distrito 2.0 Canvas Low Sneaker': [90, 89, 100, 80],
+            'Adidas Continental 80 Sneaker': [128, 160, 140, 99], 
+            'Nike Low Dunk Black and White': [170, 170, 167, 182],
             'Nike Low Dunk Medium Curry': [184, 161, 172, 164],
-            'Converse Chuck Taylor High Top Black': [103, 122, 103, 100], 
-            'Adidas Forum Low Talc Sesame': [151, 200, 174, 174],
+            'Converse Chuck Taylor High Top Black': [130, 130, 140, 80], 
+            'Adidas Forum Low Talc Sesame': [160, 161, 130, 160],
         };
 
           const prices = shoePrices[shoe as keyof typeof shoePrices] || [100, 120, 85, 122];
@@ -125,7 +124,7 @@ const shoeImages = {
                   <View style={styles.boxTextContainer}>
                     <Text style={styles.shoeNameText}>{shoe}</Text>
                     <Text style={styles.probabilityText}>{prob}</Text>
-                    <Text style={styles.priceText}>${box.price? box.price : '109'}  AUD</Text>
+                    <Text style={styles.priceText}>${box.price? box.price : '109'} AUD</Text>
                     <TouchableOpacity onPress={() => handleLinkPress(box.link)}>
                       <Text style={styles.link}>{siteName}</Text>
                     </TouchableOpacity>
@@ -155,17 +154,21 @@ const shoeImages = {
           marginVertical: 0, 
           paddingVertical: 0,
       },
+      // probText: {
+      //  fontSize: 18,
+      //  fontWeight: 'bold',
+      //  marginVertical: 0,
+      // paddingVertical: 0,
+      //},
       headerContainer: {
           alignSelf: 'flex-start', // Align the header to the left
           marginLeft: 20, // Add left margin for spacing
-          
       },
       headerText: {
           fontSize: 18,
           fontWeight: 'bold',
           marginVertical: 0,
-          paddingVertical: 0,
-          
+          paddingVertical: 0,  
       },
       scrollView: {
           flex: 1,
@@ -196,10 +199,8 @@ const shoeImages = {
           alignItems: 'flex-end',
           padding: 0,
           margin: 0,
-          //flexDirection: 'row',
-          
+          //flexDirection: 'row',  
       },
-      
       shoeNameText: {
           fontSize: 16,
           textDecorationLine: 'underline', 

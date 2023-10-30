@@ -115,7 +115,7 @@ const UploadPhoto: React.FC = () => {
   };
 
   const resultsButtonPress = () => {
-    (nav.navigate as any)("Your Flic", {shoe: shoe, pickedImage: pickedImage});
+    (nav.navigate as any)("Your Flic", {shoe: shoe, prob: prob, pickedImage: pickedImage});
   };
   
   return (
