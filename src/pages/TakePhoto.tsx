@@ -12,6 +12,7 @@ import labels from '../model/labels.json';
 import CamResults from "./CamResults";
 import axios from 'axios';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { Ionicons } from '@expo/vector-icons';
 
 
 interface PhotoType {
@@ -172,7 +173,7 @@ const TakePhoto: React.FC = () => {
   if (photo) {
     return (
       <SafeAreaView style={styles.container}>
-        <Image style={styles.photo} source={{ uri: photo.uri }} />
+        <Image style={styles.photo1} source={{ uri: photo.uri }} />
   
         <View style={styles.buttonContainer}>
           {showClassifyButton && (
@@ -222,7 +223,7 @@ const TakePhoto: React.FC = () => {
             onPress={takePicture} 
           />
           <Pressable onPress={switchCamera}>
-            {/* <Ionicons name="camera-reverse-outline" size={24} color="white" /> */}
+            <Ionicons name="camera-reverse-outline" size={24} color="white" />
         </Pressable>
         </View>
     </Camera>
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
     width: 350,
     height: 50,
     backgroundColor: '#004494',
-    marginTop: 40,
+    marginTop: 20,
     borderRadius: 15,
   },
   chooseButtonTxt: {
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 15,
   },
-    photo: {
+    photo1: {
     width: 350, 
     height: 350, 
     borderRadius: 5, 

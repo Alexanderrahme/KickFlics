@@ -122,6 +122,10 @@ const UploadPhoto: React.FC = () => {
     <SafeAreaView style={styles.container}>
         <View style={styles.firstView}>
           
+         {pickedImage === '' && (
+            <View style={styles.imagePlaceholder}/>
+          )}
+
           {pickedImage !== '' && (
             <Image
               source={{ uri: pickedImage }}
@@ -151,12 +155,7 @@ const UploadPhoto: React.FC = () => {
       
       {isLoading && <Text style={styles.loadingText}>Loading...</Text>}
 
-      {isLoading && <LottieView
-        source={require('../../assets/animation_hand.json')}
-        autoPlay
-        loop
-        style={{ paddingTop: 25, width: 300, height: 300}}
-      />}  
+   
   
 
     </View>
@@ -212,12 +211,13 @@ const styles = StyleSheet.create({
     width: 350, 
     height: 350, 
     borderRadius: 5, 
-    //backgroundColor: '#eee',
+    backgroundColor: '#eee',
   },
   image:{ 
     width: 350, 
     height: 350, 
     borderRadius: 5, 
+    marginTop: 25,
   },
   chooseButton: {
     width: 350,
