@@ -32,7 +32,7 @@ const shoeImages = {
       const [resultsData, setResultsData] = useState([]);
   
       useEffect(() => {
-          const apiKey: string = 'AIzaSyCncv7v2o2S-8nNLEwiVs28pTBTYVdxE5g'; 
+          const apiKey: string = 'AIzaSyDlUQZD11Bmnw_eQFvhOEVIVc6sx7D7LL8'; 
           const cx: string = 'a259cb0bd727843c2'; 
           const query = encodeURIComponent(`${shoe} sneakers`);
 
