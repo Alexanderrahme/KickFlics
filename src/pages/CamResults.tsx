@@ -37,13 +37,12 @@ const shoeImages = {
           const query = encodeURIComponent(`${shoe} sneakers`);
 
           const shoePrices = {
-            'Air Jordan 1': [170, 160, 168, 180],
-            'Converse Distrito 2.0 Canvas Low Sneaker': [90, 76, 90, 70],
-            'Adidas Continental 80 Sneaker': [95, 128, 95, 98], 
-            'Nike Low Dunk Black and White': [103, 123, 100, 103],
+            'Converse Distrito 2.0 Canvas Low Sneaker': [90, 89, 100, 80],
+            'Adidas Continental 80 Sneaker': [128, 160, 140, 99], 
+            'Nike Low Dunk Black and White': [170, 170, 167, 182],
             'Nike Low Dunk Medium Curry': [184, 161, 172, 164],
-            'Converse Chuck Taylor High Top Black': [103, 122, 103, 100], 
-            'Adidas Forum Low Talc Sesame': [151, 200, 174, 174],
+            'Converse Chuck Taylor High Top Black': [130, 130, 140, 80], 
+            'Adidas Forum Low Talc Sesame': [160, 161, 130, 160],
         };
   
           const prices = shoePrices[shoe as keyof typeof shoePrices] || [100, 120, 85, 122];
@@ -95,8 +94,8 @@ const shoeImages = {
           Linking.openURL(url);
           
       }
-      const handleMatchPress = (shoe, image, link) => {
-          nav.navigate("Match Details", { shoe, image, link: link });
+      const handleMatchPress = (shoe, price, image, link) => {
+          nav.navigate("Match Details", { shoe: shoe, price: price, image: image, link: link });
       }
     
       return (
@@ -117,7 +116,7 @@ const shoeImages = {
               console.log(siteName);    
       
               return (
-                <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.image, box.link)}>
+                <TouchableOpacity key={box.id} style={styles.boxContainer} onPress={() => handleMatchPress(shoe, box.price, box.image, box.link)}>
                   <Image
                     source={shoeImages[shoe] || shoeImages['Other Shoe Brand']}
                     style={styles.boxImage}
@@ -125,7 +124,7 @@ const shoeImages = {
                   <View style={styles.boxTextContainer}>
                     <Text style={styles.shoeNameText}>{shoe}</Text>
                     <Text style={styles.probabilityText}>{prob}</Text>
-                    <Text style={styles.priceText}>${box.price}  AUD</Text>
+                    <Text style={styles.priceText}>${box.price? box.price : '109'}  AUD</Text>
                     <TouchableOpacity onPress={() => handleLinkPress(box.link)}>
                       <Text style={styles.link}>{siteName}</Text>
                     </TouchableOpacity>
